@@ -1,215 +1,398 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
-<title>結案進度 Dashboard</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IMD Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#07090f;
+  --s1:#0d1220;
+  --s2:#121a2e;
+  --s3:#182237;
+  --bd:#1e2d47;
+  --bd2:#2a3f5c;
+  --tx:#d8e8ff;
+  --tx2:#4e6a8a;
+  --tx3:#8aa4c0;
+  --blue:#4f9eff;
+  --blue-d:#102244;
+  --green:#00d48a;
+  --green-d:#00281a;
+  --amber:#ffb033;
+  --amber-d:#2d1c00;
+  --red:#ff4f6a;
+  --red-d:#2d0812;
+  --mono:'DM Mono','Courier New',monospace;
+  --sans:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-.page{display:none;min-height:100vh}.page.active{display:block}
-header{background:#161b22;border-bottom:1px solid #30363d;padding:12px 16px;position:sticky;top:0;z-index:10}
-.hrow{display:flex;align-items:center;gap:10px}
-.back{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px}
-.back:hover{background:#30363d;color:#e6edf3}
-h1{font-size:16px;font-weight:600;color:#e6edf3;flex:1}
-.sub{font-size:12px;color:#8b949e;margin-top:2px}
-.wrap{padding:12px}
-.card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,background .2s}
-.card:hover{border-color:#58a6ff;background:#1a2332}
-.scard{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,background .2s}
-.scard:hover{border-color:#58a6ff;background:#1a2332}
-.row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.name{font-size:15px;font-weight:600}
-.sname{font-size:14px;font-weight:600}
-.badge{font-size:12px;font-weight:600;padding:2px 8px;border-radius:12px}
-.g{background:#1a4228;color:#3fb950}.y{background:#3d2c00;color:#d29922}.r{background:#3d1a1a;color:#f85149}
-.bar{background:#21262d;border-radius:3px;height:6px;overflow:hidden;margin-bottom:6px}
-.fill{height:100%;border-radius:3px}
-.fg{background:#3fb950}.fy{background:#d29922}.fr{background:#f85149}.fb{background:#58a6ff}
-.stats{display:flex;justify-content:space-between;font-size:11px;color:#8b949e}
-.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
-.ts{background:#0d2d6e;color:#58a6ff;border:1px solid #1f4a9e;font-size:10px;padding:1px 6px;border-radius:6px}
-.tf{background:#1a3d1a;color:#3fb950;border:1px solid #2a5c2a;font-size:10px;padding:1px 6px;border-radius:6px}
-.tb{background:#3d1e00;color:#e67a1a;border:1px solid #5c3200;font-size:10px;padding:1px 6px;border-radius:6px}
-.cnt{font-size:11px;color:#8b949e;background:#21262d;padding:2px 8px;border-radius:10px}
-.rank{font-size:11px;color:#8b949e;min-width:18px}
-.plan{font-size:11px;color:#8b949e;background:#21262d;padding:1px 6px;border-radius:8px;margin-left:6px}
-.ds{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px;margin-bottom:12px}
-.dt{font-size:12px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
-.dr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d}
-.dr:last-child{border-bottom:none}
-.dl{font-size:13px;color:#8b949e}.dv{font-size:13px;color:#e6edf3;font-weight:600}
-.mr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #21262d}
-.mr:last-child{border-bottom:none}
-.ml{font-size:12px;color:#8b949e;min-width:30px}
-.mi{flex:1;margin-left:8px;font-size:12px;color:#e6edf3}
-.ma{font-size:12px;color:#58a6ff;font-weight:600;min-width:70px;text-align:right}
-.sum{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px;margin-bottom:14px}
-.sumt{font-size:12px;color:#8b949e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+html{-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+
+/* ── NAV ── */
+.nav{
+  display:flex;background:var(--s1);
+  border-bottom:1px solid var(--bd);
+  position:sticky;top:0;z-index:100;
+  padding:0 4px;
+}
+.nav button{
+  flex:1;padding:14px 4px 12px;background:none;border:none;
+  color:var(--tx2);font-size:13px;font-family:var(--sans);
+  cursor:pointer;position:relative;letter-spacing:.04em;
+  transition:color .2s;
+}
+.nav button::after{
+  content:'';position:absolute;bottom:0;left:20%;right:20%;
+  height:2px;background:var(--blue);border-radius:2px 2px 0 0;
+  transform:scaleX(0);transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+.nav button.active{color:var(--blue);}
+.nav button.active::after{transform:scaleX(1);}
+
+/* ── PAGES ── */
+.page{display:none;padding:16px 14px 32px}
+.page.active{display:block}
+
+/* ── TYPOGRAPHY ── */
+.pg-title{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2);margin-bottom:16px}
+.back-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  color:var(--blue);font-size:13px;cursor:pointer;
+  border:none;background:none;padding:0;margin-bottom:16px;
+  opacity:.8;transition:opacity .15s;
+}
+.back-btn:active{opacity:1}
+.back-btn::before{content:'←';font-family:var(--mono)}
+
+/* ── SUMMARY BOX ── */
+.sum-box{
+  background:linear-gradient(135deg,var(--s2) 0%,var(--s3) 100%);
+  border:1px solid var(--bd2);border-radius:12px;
+  padding:14px 16px 16px;margin-bottom:18px;
+  position:relative;overflow:hidden;
+}
+.sum-box::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:120px;height:120px;
+  background:radial-gradient(circle,rgba(79,158,255,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.sum-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx2);margin-bottom:12px}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.sum-item{background:var(--s1);border-radius:8px;padding:10px 12px}
+.sum-val{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--blue);letter-spacing:-.01em}
+.sum-lbl{font-size:10px;color:var(--tx2);margin-top:3px;letter-spacing:.06em}
+
+/* ── PROGRESS BAR ── */
+.bar-track{
+  width:100%;height:5px;background:rgba(255,255,255,.06);
+  border-radius:3px;overflow:hidden;
+}
+.bar-fill{
+  height:100%;border-radius:3px;
+  transition:width .6s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.bar-fill::after{
+  content:'';position:absolute;top:0;left:-60px;width:60px;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+  animation:shimmer 2.4s infinite;
+}
+@keyframes shimmer{0%{left:-60px}100%{left:110%}}
+.bar-fill.g{background:linear-gradient(90deg,#00a86e,var(--green))}
+.bar-fill.w{background:linear-gradient(90deg,#c87000,var(--amber))}
+.bar-fill.r{background:linear-gradient(90deg,#c02040,var(--red))}
+
+/* ── CHIP / BADGE ── */
+.chip{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:10px;font-family:var(--mono);font-weight:500;
+  padding:2px 7px;border-radius:20px;margin-left:6px;
+  vertical-align:middle;
+}
+.chip::before{content:'•';font-size:8px}
+.chip.g{background:var(--green-d);color:var(--green)}
+.chip.w{background:var(--amber-d);color:var(--amber)}
+.chip.r{background:var(--red-d);color:var(--red)}
+
+/* ── REP / ACT CARD ── */
+.card{
+  background:var(--s1);
+  border:1px solid var(--bd);
+  border-left:3px solid var(--bd2);
+  border-radius:10px;padding:14px 16px;
+  margin-bottom:10px;cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.card:active{background:var(--s2);border-left-color:var(--blue)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start}
+.card-name{font-size:15px;font-weight:600;color:var(--tx);letter-spacing:.01em}
+.card-meta{font-size:11px;color:var(--tx2);margin-top:5px;line-height:1.6}
+.card-meta b{color:var(--tx3);font-weight:400}
+.card-rate-big{
+  font-family:var(--mono);font-size:18px;font-weight:500;
+  line-height:1;text-align:right;
+}
+
+/* ── STORE CARD ── */
+.scard{
+  background:var(--s1);border:1px solid var(--bd);border-radius:10px;
+  padding:12px 14px;margin-bottom:8px;cursor:pointer;
+  display:flex;gap:10px;align-items:center;
+  transition:background .15s;
+}
+.scard:active{background:var(--s2)}
+.rank{
+  font-family:var(--mono);font-size:26px;font-weight:500;
+  color:var(--bd2);min-width:32px;text-align:center;line-height:1;
+}
+.scard-body{flex:1;min-width:0}
+.scard-name{font-size:14px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scard-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+.scard-right{text-align:right;flex-shrink:0}
+.scard-amt{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--blue)}
+.scard-rem{font-size:10px;color:var(--tx2);margin-top:2px;font-family:var(--mono)}
+
+/* ── DETAIL ── */
+.det-box{
+  background:var(--s1);border:1px solid var(--bd);border-radius:10px;
+  padding:16px;margin-bottom:12px;
+}
+.det-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx2);margin-bottom:12px}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.kv:last-child{border-bottom:none;padding-bottom:0}
+.kv-k{color:var(--tx2)}
+.kv-v{font-weight:600;color:var(--tx);font-family:var(--mono);font-size:13px}
+.det-bar-wrap{margin-top:10px}
+.det-bar-track{width:100%;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
+.det-bar-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--tx2);margin-top:5px;font-family:var(--mono)}
+
+.empty{text-align:center;padding:48px 16px;color:var(--tx2);font-size:14px}
 </style>
 </head>
 <body>
-<div id="p1" class="page active">
-  <header><div class="hrow"><h1>結案進度 Dashboard</h1></div><div class="sub">FY26 業務總覽</div></header>
-  <div class="wrap" id="c1"></div>
-</div>
-<div id="p2" class="page">
-  <header><div class="hrow"><button class="back" onclick="go(1)">&#9664; 返回</button><h1 id="t2"></h1></div><div id="s2" class="sub"></div></header>
-  <div class="wrap" id="c2"></div>
-</div>
-<div id="p3" class="page">
-  <header><div class="hrow"><button class="back" onclick="go(2)">&#9664; 返回</button><h1 id="t3"></h1></div><div id="s3" class="sub"></div></header>
-  <div class="wrap" id="c3"></div>
-</div>
-<div id="p4" class="page">
-  <header><div class="hrow"><button class="back" onclick="go(3)">&#9664; 返回</button><h1 id="t4"></h1></div><div id="s4" class="sub"></div></header>
-  <div class="wrap" id="c4"></div>
-</div>
+<nav class="nav">
+  <button id="tab0" class="active" onclick="showTab(0)">業務</button>
+  <button id="tab1" onclick="showTab(1)">活動</button>
+  <button id="tab2" onclick="showTab(2)">店家</button>
+</nav>
+<div id="p0" class="page active"></div>
+<div id="p1" class="page"></div>
+<div id="p2" class="page"></div>
+<div id="p3" class="page"></div>
+
 <script>
-var D={"spec_stores":[{"rep":"Jerry","store":"\u8cb7\u9152\u7db2","contract":2765949.0,"actual":1423996.0,"rate":0.5148,"type":"\u5e74\u7279\u6848"},{"rep":"Jerry","store":"\u662d\u696d","contract":2791070.0,"actual":1785885.0,"rate":0.6399,"type":"\u5e74\u7279\u6848"},{"rep":"Jerry","store":"\u4f73\u8cc0","contract":2728530.0,"actual":3096719.0,"rate":1.1349,"type":"\u5e74\u7279\u6848"},{"rep":"Jerry","store":"\u81ea\u7acb","contract":1002730.0,"actual":210016.0,"rate":0.2094,"type":"\u5e74\u7279\u6848"},{"rep":"Jerry","store":"\u792b\u77f3(\u9752\u525b\u6adf)","contract":2517440.0,"actual":1478099.0,"rate":0.5871,"type":"\u5e74\u7279\u6848"},{"rep":"Emily","store":"\u5049\u6210(\u66f9\u6587\u9752)","contract":2503745.0,"actual":760856.0,"rate":0.3039,"type":"\u5e74\u7279\u6848"},{"rep":"Eric","store":"\u53f0\u5143(\u4f73\u4ea8)","contract":2500000.0,"actual":1436917.0,"rate":0.5748,"type":"\u5e74\u7279\u6848"},{"rep":"Jayden","store":"\u8461\u6676","contract":2500000.0,"actual":421345.0,"rate":0.1685,"type":"\u5e74\u7279\u6848"},{"rep":"Jayden","store":"\u7f8e\u829d\u57ce(\u4e0d\u5012\u7fc1)","contract":2500000.0,"actual":1462377.0,"rate":0.585,"type":"\u5e74\u7279\u6848"},{"rep":"Wei","store":"\u5955\u6b23(600\u842c)","contract":6140010.0,"actual":4424577.0,"rate":0.7206,"type":"\u5e74\u7279\u6848"},{"rep":"Wei","store":"\u5955\u6b23(400\u842c)","contract":4000000.0,"actual":918900.0,"rate":0.2297,"type":"\u5e74\u7279\u6848"},{"rep":"Yi","store":"\u5bf0\u4ea8","contract":5013820.0,"actual":4340047.0,"rate":0.8656,"type":"\u5e74\u7279\u6848"},{"rep":"Yi","store":"\u54c1\u7fd4","contract":1403297.0,"actual":465564.0,"rate":0.3318,"type":"\u5e74\u7279\u6848"},{"rep":"Emily","store":"\u6d0b\u9152\u57ce(GGN18)","contract":1920000.0,"actual":1920000.0,"rate":1.0,"type":"\u5e74\u7279\u6848"},{"rep":"Jayden","store":"\u7f8e\u829d\u57ce(GGN25)","contract":315720.0,"actual":315720.0,"rate":1.0,"type":"\u5e74\u7279\u6848"},{"rep":"Jayden","store":"\u7f8e\u829d\u57ce(GGN25)","contract":868230.0,"actual":868230.0,"rate":1.0,"type":"\u5e74\u7279\u6848"},{"rep":"Jayden","store":"\u7f8e\u829d\u57ce(GGN18&21)","contract":2159300.0,"actual":2159300.0,"rate":1.0,"type":"\u5e74\u7279\u6848"},{"rep":"Emily","store":"18595728.999992","contract":11725711.0,"actual":1.0,"rate":0.1839,"type":"\u5e74\u7279\u6848"},{"rep":"Jerry","store":"20287255","contract":12854552.0,"actual":1.0,"rate":0.2016,"type":"\u5e74\u7279\u6848"},{"rep":"Jayden","store":"17918506","contract":9599969.0,"actual":1.0,"rate":0.1505,"type":"\u5e74\u7279\u6848"},{"rep":"Eric","store":"16056712","contract":10680967.0,"actual":1.0,"rate":0.1675,"type":"\u5e74\u7279\u6848"},{"rep":"Wei","store":"18461770","contract":11738700.0,"actual":1.0,"rate":0.1841,"type":"\u5e74\u7279\u6848"},{"rep":"Yi","store":"8817117","contract":7171609.0,"actual":1.0,"rate":0.1125,"type":"\u5e74\u7279\u6848"},{"rep":"TTL","store":"100137088.999992","contract":63771508.0,"actual":1.0,"rate":0,"type":"\u5e74\u7279\u6848"}],"store_monthly":{"\u8cb7\u9152\u7db2":{"10":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":24,"price":1135.0,"amount":27240.0}],"11":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":84,"price":1135.0,"amount":95340.0}],"12":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":12,"price":1135.0,"amount":13620.0}],"1":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":12,"price":1135.0,"amount":13620.0}],"2":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":12,"price":1135.0,"amount":13620.0}],"3":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":12,"price":1135.0,"amount":13620.0}]},"\u662d\u696d":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"\u4f73\u8cc0":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"\u81ea\u7acb":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"\u792b\u77f3(\u9752\u525b\u6adf)":{"10":[],"11":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":12,"price":1135.0,"amount":13620.0}],"12":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":12,"price":1135.0,"amount":13620.0}],"1":[],"2":[],"3":[]},"\u5049\u6210":{"10":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":6,"price":1135.0,"amount":6810.0}],"11":[],"12":[],"1":[],"2":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":12,"price":1135.0,"amount":13620.0}],"3":[]},"\u53f0\u5143(\u4f73\u4ea8)":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"\u8461\u6676":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"\u7f8e\u829d\u57ce(\u4e0d\u5012\u7fc1)":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"\u5955\u6b23(600\u842c)":{"10":[],"11":[],"12":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":24,"price":1135.0,"amount":27240.0}],"1":[],"2":[],"3":[{"product":"\u683c\u862d\u54e5\u5c3c","qty":24,"price":1135.0,"amount":27240.0}]},"\u5955\u6b23(400\u842c)":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"\u5bf0\u4ea8":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"\u54c1\u7fd4":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"AAA":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]}},"flex_stores":[{"rep":"Emily","store":"\u826f\u65b0","plan":"A","contract":1400000.0,"total":257376.0,"q1":0.0,"q2":257376.0,"rate":0.1838,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u8302\u8c50","plan":"A","contract":1400000.0,"total":642898.0,"q1":222120.0,"q2":420778.0,"rate":0.4592,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u6d0b\u9152\u57ce","plan":"A","contract":1400000.0,"total":1108334.0,"q1":257064.0,"q2":851270.0,"rate":0.7917,"result_q1":"\u4e0d\u7b26","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u6ce2\u723e\u591a","plan":"B","contract":700000.0,"total":785988.0,"q1":169848.0,"q2":616140.0,"rate":1.1228,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u842c\u83ef\u83f8\u9152","plan":"B","contract":700000.0,"total":620136.0,"q1":419164.0,"q2":200972.0,"rate":0.8859,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u6587\u5f6c","plan":"B","contract":700000.0,"total":296040.0,"q1":117480.0,"q2":178560.0,"rate":0.4229,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u5df7\u5f04","plan":"B","contract":700000.0,"total":554724.0,"q1":374490.0,"q2":180234.0,"rate":0.7925,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u73c8\u54c1","plan":"B","contract":700000.0,"total":838985.0,"q1":347625.0,"q2":491360.0,"rate":1.1986,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u5168\u65e5\u767c","plan":"B","contract":700000.0,"total":556198.0,"q1":462052.0,"q2":94146.0,"rate":0.7946,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u5448\u946b","plan":"C","contract":400000.0,"total":370435.0,"q1":231220.0,"q2":139215.0,"rate":0.9261,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u65ed\u54c1","plan":"C","contract":400000.0,"total":99900.0,"q1":80100.0,"q2":19800.0,"rate":0.2497,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u677e\u5c71","plan":"C","contract":400000.0,"total":334600.0,"q1":204650.0,"q2":129950.0,"rate":0.8365,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u4e09\u79be","plan":"B","contract":700000.0,"total":632884.0,"q1":394058.0,"q2":238826.0,"rate":0.9041,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u9f4a\u6cf0","plan":"C","contract":400000.0,"total":0.0,"q1":0.0,"q2":0.0,"rate":0.0,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u9152\u9152\u5c08\u8ca9\u6240","plan":"C","contract":400000.0,"total":233760.0,"q1":134760.0,"q2":99000.0,"rate":0.5844,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u9152\u5927\u738b","plan":"B","contract":700000.0,"total":706816.0,"q1":422548.0,"q2":284268.0,"rate":1.0097,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u62ff\u7834\u5d19","plan":"C","contract":400000.0,"total":54925.0,"q1":20688.0,"q2":34237.0,"rate":0.1373,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u91d1\u54c1","plan":"C","contract":400000.0,"total":129542.0,"q1":8212.0,"q2":121330.0,"rate":0.3239,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u9187\u8c50\u9152\u85cf(\u5b89\u52dd)","plan":"C","contract":400000.0,"total":90460.0,"q1":59320.0,"q2":31140.0,"rate":0.2261,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u68ee\u6210","plan":"C","contract":400000.0,"total":197690.0,"q1":68692.0,"q2":128998.0,"rate":0.4942,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Emily","store":"\u5c0f\u516d","plan":"C","contract":400000.0,"total":192538.0,"q1":56536.0,"q2":136002.0,"rate":0.4813,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u52a0\u5dde","plan":"B","contract":700000.0,"total":619267.0,"q1":315456.0,"q2":303811.0,"rate":0.8847,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u53cb\u7f8e","plan":"B","contract":700000.0,"total":321657.0,"q1":217078.0,"q2":104579.0,"rate":0.4595,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u4ea8\u7396","plan":"C","contract":400000.0,"total":118800.0,"q1":74280.0,"q2":44520.0,"rate":0.297,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u91d1\u76c3","plan":"C","contract":400000.0,"total":237096.0,"q1":62808.0,"q2":174288.0,"rate":0.5927,"result_q1":"\u4e0d\u7b26","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u6dfb\u9152","plan":"B","contract":700000.0,"total":370426.0,"q1":241280.0,"q2":129146.0,"rate":0.5292,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u4e99\u9e97","plan":"C","contract":400000.0,"total":201281.0,"q1":80599.0,"q2":120682.0,"rate":0.5032,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u9152\u8993","plan":"C","contract":400000.0,"total":130374.0,"q1":78810.0,"q2":51564.0,"rate":0.3259,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u6625\u6cf0\u884c","plan":"B","contract":700000.0,"total":493558.0,"q1":373524.0,"q2":120034.0,"rate":0.7051,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u4e00\u4e03\u96f6\u4e5d","plan":"B","contract":700000.0,"total":490125.0,"q1":272952.0,"q2":217173.0,"rate":0.7002,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u9152\u591a\u6a02","plan":"B","contract":700000.0,"total":689394.0,"q1":254242.0,"q2":435152.0,"rate":0.9848,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u4e0a\u9187","plan":"A","contract":1400000.0,"total":478140.0,"q1":398940.0,"q2":79200.0,"rate":0.3415,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u9ea5\u5fb7\u91cc","plan":"C","contract":400000.0,"total":158784.0,"q1":91440.0,"q2":67344.0,"rate":0.397,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jerry","store":"\u611b\u9152\u7aa9","plan":"C","contract":400000.0,"total":21279.0,"q1":6159.0,"q2":15120.0,"rate":0.0532,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u53e4\u5178","plan":"C","contract":400000.0,"total":184418.0,"q1":0.0,"q2":184418.0,"rate":0.461,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u541b\u8588","plan":"B","contract":700000.0,"total":460857.0,"q1":289736.0,"q2":171121.0,"rate":0.6584,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u65e5\u4eab","plan":"A","contract":1400000.0,"total":965123.0,"q1":737798.0,"q2":227325.0,"rate":0.6894,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u4e09\u5144\u5f1f","plan":"B","contract":700000.0,"total":401520.0,"q1":206996.0,"q2":194524.0,"rate":0.5736,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u5b8f\u4e9e-\u535a\u9152\u840a","plan":"A","contract":1400000.0,"total":1240189.0,"q1":253946.0,"q2":986243.0,"rate":0.8858,"result_q1":"\u4e0d\u7b26","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u7f8e\u6eff","plan":"A","contract":1400000.0,"total":626802.0,"q1":487242.0,"q2":139560.0,"rate":0.4477,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u5de7\u5de7","plan":"A","contract":1400000.0,"total":499660.0,"q1":379424.0,"q2":120236.0,"rate":0.3569,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u5a01\u58eb\u5fcc\u5148\u751f","plan":"A","contract":1400000.0,"total":927920.0,"q1":518550.0,"q2":409370.0,"rate":0.6628,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u5357\u5340\u694a","plan":"C","contract":400000.0,"total":143160.0,"q1":115920.0,"q2":27240.0,"rate":0.3579,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u552f\u541b(\u6b23\u5dde)","plan":"B","contract":700000.0,"total":599490.0,"q1":416616.0,"q2":182874.0,"rate":0.8564,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u83ef\u5a01","plan":"C","contract":400000.0,"total":99960.0,"q1":97690.0,"q2":2270.0,"rate":0.2499,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u5bb8\u9038","plan":"C","contract":400000.0,"total":159660.0,"q1":100260.0,"q2":59400.0,"rate":0.3992,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Eric","store":"\u91d1\u99ac","plan":"C","contract":400000.0,"total":303500.0,"q1":189850.0,"q2":113650.0,"rate":0.7588,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u9152\u6c5f\u6751","plan":"B","contract":700000.0,"total":186216.0,"q1":81480.0,"q2":104736.0,"rate":0.266,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u5168\u7403","plan":"A","contract":1400000.0,"total":0.0,"q1":0.0,"q2":0.0,"rate":0.0,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u5927\u767b","plan":"A","contract":1400000.0,"total":400200.0,"q1":319740.0,"q2":80460.0,"rate":0.2859,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u76db\u7d05","plan":"C","contract":400000.0,"total":212378.0,"q1":146006.0,"q2":66372.0,"rate":0.5309,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u9245\u6d0b","plan":"C","contract":400000.0,"total":0.0,"q1":0.0,"q2":0.0,"rate":0.0,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u6607\u54c1","plan":"C","contract":400000.0,"total":0.0,"q1":0.0,"q2":0.0,"rate":0.0,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u4e09\u6876","plan":"C","contract":400000.0,"total":147562.0,"q1":72462.0,"q2":75100.0,"rate":0.3689,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u7cbe\u6e5b","plan":"C","contract":400000.0,"total":205432.0,"q1":118128.0,"q2":87304.0,"rate":0.5136,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u5c0f\u6797\u9152(\u4e0a\u591a)","plan":"B","contract":700000.0,"total":459492.0,"q1":459492.0,"q2":0.0,"rate":0.6564,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u900d\u9059","plan":"C","contract":400000.0,"total":257629.0,"q1":173889.0,"q2":83740.0,"rate":0.6441,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u7d05\u9152\u838a","plan":"A","contract":1400000.0,"total":853377.0,"q1":680328.0,"q2":173049.0,"rate":0.6096,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Jayden","store":"\u9152\u6e56","plan":"C","contract":400000.0,"total":271820.0,"q1":153780.0,"q2":118040.0,"rate":0.6795,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u548c\u6613","plan":"B","contract":700000.0,"total":850220.0,"q1":480020.0,"q2":370200.0,"rate":1.2146,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u9f13\u5c71\u838a","plan":"B","contract":700000.0,"total":358262.0,"q1":280164.0,"q2":78098.0,"rate":0.5118,"result_q1":"\u53ef\u7d50","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u79be\u7a69","plan":"A","contract":1400000.0,"total":1090973.0,"q1":518044.0,"q2":572929.0,"rate":0.7793,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u5357\u5a01\u6d77","plan":"C","contract":400000.0,"total":227272.0,"q1":126912.0,"q2":100360.0,"rate":0.5682,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u5bb8\u6cf0","plan":"C","contract":400000.0,"total":316658.0,"q1":169860.0,"q2":146798.0,"rate":0.7916,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u51a0\u83ef","plan":"B","contract":700000.0,"total":638178.0,"q1":332220.0,"q2":305958.0,"rate":0.9117,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u96b1\u7396\u751f\u6d3b","plan":"C","contract":400000.0,"total":248993.0,"q1":114845.0,"q2":134148.0,"rate":0.6225,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u88d5\u965e","plan":"B","contract":700000.0,"total":631578.0,"q1":304212.0,"q2":327366.0,"rate":0.9023,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u632f\u660c","plan":"C","contract":400000.0,"total":446617.0,"q1":171404.0,"q2":275213.0,"rate":1.1165,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u51a0\u5fb7","plan":"C","contract":400000.0,"total":426204.0,"q1":169812.0,"q2":256392.0,"rate":1.0655,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u5609\u582d","plan":"B","contract":700000.0,"total":502620.0,"q1":289208.0,"q2":213412.0,"rate":0.718,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u54c1\u946b","plan":"C","contract":400000.0,"total":246792.0,"q1":186157.0,"q2":60635.0,"rate":0.617,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u67cf\u68ee","plan":"C","contract":400000.0,"total":124896.0,"q1":34128.0,"q2":90768.0,"rate":0.3122,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Wei","store":"\u4f73\u9152\u838a","plan":"C","contract":400000.0,"total":54120.0,"q1":39600.0,"q2":14520.0,"rate":0.1353,"result_q1":"\u4e0d\u7b26","result_q2":"\u4e0d\u7b26","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Yi","store":"\u5c1a\u5b8f","plan":"C","contract":400000.0,"total":411840.0,"q1":232272.0,"q2":179568.0,"rate":1.0296,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Yi","store":"\u4e45\u666f","plan":"C","contract":400000.0,"total":751187.0,"q1":366289.0,"q2":384898.0,"rate":1.878,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Yi","store":"\u9187\u7235","plan":"C","contract":400000.0,"total":300600.0,"q1":189000.0,"q2":111600.0,"rate":0.7515,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Yi","store":"\u5927\u5927","plan":"C","contract":400000.0,"total":230859.0,"q1":152049.0,"q2":78810.0,"rate":0.5771,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Yi","store":"\u91d1\u5bcc\u7965","plan":"C","contract":400000.0,"total":451202.0,"q1":125568.0,"q2":325634.0,"rate":1.128,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"},{"rep":"Yi","store":"\u6b50\u7f8e","plan":"C","contract":400000.0,"total":220310.0,"q1":167830.0,"q2":52480.0,"rate":0.5508,"result_q1":"\u53ef\u7d50","result_q2":"\u53ef\u7d50","has_q2":true,"type":"\u5f48\u6027\u5e74\u7d04"}],"big_mouth_stores":[{"rep":"Jerry","store":"\u5564\u9152\u5927\u5b78","item":"IOS15","contract":302400.0,"actual":231840.0,"rate":0.7667,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"\u6df6\u6df6","item":"IOS18","contract":69840.0,"actual":69840.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u7687\u54c1","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u675c\u5eb7-\u6597\u516d","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Wei","store":"\u5442\u8a18","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jerry","store":"\u5564\u9152\u5927\u5b782","item":"IOS18","contract":419040.0,"actual":139680.0,"rate":0.3333,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"\u6df6\u6df62","item":"IOS15","contract":20160.0,"actual":16800.0,"rate":0.8333,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u6587\u7965","item":"IOS12","contract":56520.0,"actual":96084.0,"rate":1.7,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u675c\u5eb7-\u6210\u529f","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Wei","store":"\u9091\u6771","item":"IOS15","contract":20160.0,"actual":30240.0,"rate":1.5,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jerry","store":"\u91d1\u9152\u6bbf","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"3Q","item":"IOS15","contract":100800.0,"actual":90720.0,"rate":0.9,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u9152\u88d5","item":"IOS15","contract":50400.0,"actual":50400.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u91d1\u99ac","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jerry","store":"\u946b\u751f\u6d3b","item":"IOS15","contract":20160.0,"actual":23520.0,"rate":1.1667,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"\u6842\u51a0\u9152\u838a","item":"IOS18","contract":27936.0,"actual":13968.0,"rate":0.5,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u6587\u79652","item":"IOS15","contract":201600.0,"actual":223440.0,"rate":1.1083,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u9152\u5c1a","item":"IOS18","contract":419040.0,"actual":446976.0,"rate":1.0667,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"\u963f\u723e\u767c","item":"IOS18","contract":27936.0,"actual":6984.0,"rate":0.25,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u559c\u6d0b\u6d0b","item":"IOS15","contract":50400.0,"actual":50400.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u9152\u5c1a2","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"\u5955\u946b\u884c","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u539f\u529b","item":"IOS18","contract":419040.0,"actual":488880.0,"rate":1.1667,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u5c0b\u9152\u8da3","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"\u6021\u548c","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u5409\u7acb","item":"IOS18","contract":69840.0,"actual":76824.0,"rate":1.1,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u5c0b\u9152\u8da32","item":"IOS18","contract":419040.0,"actual":419040.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"\u5a01\u82d1","item":"IOS18","contract":27936.0,"actual":55872.0,"rate":2.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u6587\u79653","item":"IOS18","contract":279360.0,"actual":251424.0,"rate":0.9,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u9686\u8c50","item":"IOS12","contract":56520.0,"actual":67824.0,"rate":1.2,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Emily","store":"\u5a01\u82d12","item":"IOS21","contract":49280.0,"actual":49280.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u827e\u96f7","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u9686\u8c502","item":"IOS18","contract":27936.0,"actual":39576.0,"rate":1.4167,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u5b89\u8fea","item":"TD12","contract":29160.0,"actual":29160.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u6e90\u9109\u884c","item":"IOS18","contract":139680.0,"actual":209520.0,"rate":1.5,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Jayden","store":"\u9152\u6e2f(\u5168\u597d\u884c)","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u6e90\u9109\u884c2","item":"TD12","contract":29160.0,"actual":58320.0,"rate":2.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u842c\u6876","item":"IOS15","contract":201600.0,"actual":226800.0,"rate":1.125,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u9152\u5c0a","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u9152\u5c0a2","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u9752\u65fa","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u4e03\u4e03\u6703\u793e","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u963f\u6e05\u67d1\u4ed4\u5e97","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u6c9b\u7dc1","item":"IOS12","contract":11304.0,"actual":11304.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u4e09\u767c\u6d0b\u884c","item":"IOS18","contract":139680.0,"actual":139680.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u52a0\u7d0d","item":"IOS18","contract":69840.0,"actual":69840.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u7f8e\u611f\u81e8\u9152","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u6842\u51a0","item":"IOS15","contract":50400.0,"actual":53760.0,"rate":1.0667,"type":"\u5927\u53e3\u6d3b\u52d5"},{"rep":"Eric","store":"\u83ef\u5bcc","item":"IOS18","contract":139680.0,"actual":167616.0,"rate":1.2,"type":"\u5927\u53e3\u6d3b\u52d5"}]};
-var curRepIdx=0,curActIdx=0;
+var D={"spec_stores": [{"rep": "Jerry", "store": "\u8cb7\u9152\u7db2", "contract": 2765949.0, "actual": 1423996.0, "rate": 0.5148308952912726}, {"rep": "Jerry", "store": "\u662d\u696d", "contract": 2791070.0, "actual": 1785885.0, "rate": 0.6398567574442776}, {"rep": "Jerry", "store": "\u4f73\u8cc0", "contract": 2728530.0, "actual": 3096719.0, "rate": 1.1349404257970408}, {"rep": "Jerry", "store": "\u81ea\u7acb", "contract": 1002730.0, "actual": 210016.0, "rate": 0.209444217286807}, {"rep": "Jerry", "store": "\u792b\u77f3(\u9752\u525b\u6adf)", "contract": 2517440.0, "actual": 1478099.0, "rate": 0.5871436856489132}, {"rep": "Emily", "store": "\u5049\u6210(\u66f9\u6587\u9752)", "contract": 2503745.0, "actual": 760856.0, "rate": 0.30388717700884077}, {"rep": "Eric", "store": "\u53f0\u5143(\u4f73\u4ea8)", "contract": 2500000.0, "actual": 1436917.0, "rate": 0.5747668}, {"rep": "Jayden", "store": "\u8461\u6676", "contract": 2500000.0, "actual": 421345.0, "rate": 0.168538}, {"rep": "Jayden", "store": "\u7f8e\u829d\u57ce(\u4e0d\u5012\u7fc1)", "contract": 2500000.0, "actual": 1462377.4285714286, "rate": 0.5849509714285714}, {"rep": "Wei", "store": "\u5955\u6b23(600\u842c)", "contract": 6140010.0, "actual": 4424577.0, "rate": 0.7206139729414122}, {"rep": "Wei", "store": "\u5955\u6b23(400\u842c)", "contract": 4000000.0, "actual": 918900.0, "rate": 0.229725}, {"rep": "Yi", "store": "\u5bf0\u4ea8", "contract": 5013820.0, "actual": 4340047.0, "rate": 0.8656168350678723}, {"rep": "Yi", "store": "\u54c1\u7fd4", "contract": 1403297.0, "actual": 465564.0, "rate": 0.33176440910227845}, {"rep": "Emily", "store": "\u6d0b\u9152\u57ce(GGN18)", "contract": 1920000.0, "actual": 1920000.0, "rate": 1.0}, {"rep": "Jayden", "store": "\u7f8e\u829d\u57ce(GGN25)", "contract": 315720.0, "actual": 315720.0, "rate": 1.0}, {"rep": "Jayden", "store": "\u7f8e\u829d\u57ce(GGN25)", "contract": 868230.0, "actual": 868230.0, "rate": 1.0}, {"rep": "Jayden", "store": "\u7f8e\u829d\u57ce(GGN18&21)", "contract": 2159300.0, "actual": 2159300.0, "rate": 1.0}], "flex_stores": [{"rep": "Emily", "store": "\u826f\u65b0", "contract": 1400000.0, "actual": 257376.0, "rate": 0.18384}, {"rep": "Emily", "store": "\u8302\u8c50", "contract": 1400000.0, "actual": 642898.0, "rate": 0.45921285714285714}, {"rep": "Emily", "store": "\u6d0b\u9152\u57ce", "contract": 1400000.0, "actual": 1108334.0, "rate": 0.7916671428571429}, {"rep": "Emily", "store": "\u6ce2\u723e\u591a", "contract": 700000.0, "actual": 785988.0, "rate": 1.12284}, {"rep": "Emily", "store": "\u842c\u83ef\u83f8\u9152", "contract": 700000.0, "actual": 620136.0, "rate": 0.8859085714285714}, {"rep": "Emily", "store": "\u6587\u5f6c", "contract": 700000.0, "actual": 296040.0, "rate": 0.4229142857142857}, {"rep": "Emily", "store": "\u5df7\u5f04", "contract": 700000.0, "actual": 554724.0, "rate": 0.7924628571428571}, {"rep": "Emily", "store": "\u73c8\u54c1", "contract": 700000.0, "actual": 838985.0, "rate": 1.19855}, {"rep": "Emily", "store": "\u5168\u65e5\u767c", "contract": 700000.0, "actual": 556198.0, "rate": 0.7945685714285714}, {"rep": "Emily", "store": "\u5448\u946b", "contract": 400000.0, "actual": 370434.85714285716, "rate": 0.9260871428571429}, {"rep": "Emily", "store": "\u65ed\u54c1", "contract": 400000.0, "actual": 99900.0, "rate": 0.24975}, {"rep": "Emily", "store": "\u677e\u5c71", "contract": 400000.0, "actual": 334600.0, "rate": 0.8365}, {"rep": "Emily", "store": "\u4e09\u79be", "contract": 700000.0, "actual": 632884.0, "rate": 0.90412}, {"rep": "Emily", "store": "\u9f4a\u6cf0", "contract": 400000.0, "actual": 0.0, "rate": 0.0}, {"rep": "Emily", "store": "\u9152\u9152\u5c08\u8ca9\u6240", "contract": 400000.0, "actual": 233760.0, "rate": 0.5844}, {"rep": "Emily", "store": "\u9152\u5927\u738b", "contract": 700000.0, "actual": 706816.0, "rate": 1.0097371428571429}, {"rep": "Emily", "store": "\u62ff\u7834\u5d19", "contract": 400000.0, "actual": 54925.0, "rate": 0.1373125}, {"rep": "Emily", "store": "\u91d1\u54c1", "contract": 400000.0, "actual": 129542.0, "rate": 0.323855}, {"rep": "Emily", "store": "\u9187\u8c50\u9152\u85cf(\u5b89\u52dd)", "contract": 400000.0, "actual": 90460.0, "rate": 0.22615}, {"rep": "Emily", "store": "\u68ee\u6210", "contract": 400000.0, "actual": 197690.0, "rate": 0.494225}, {"rep": "Emily", "store": "\u5c0f\u516d", "contract": 400000.0, "actual": 192538.0, "rate": 0.481345}, {"rep": "Jerry", "store": "\u52a0\u5dde", "contract": 700000.0, "actual": 619267.0, "rate": 0.8846671428571429}, {"rep": "Jerry", "store": "\u53cb\u7f8e", "contract": 700000.0, "actual": 321657.0, "rate": 0.45951}, {"rep": "Jerry", "store": "\u4ea8\u7396", "contract": 400000.0, "actual": 118800.0, "rate": 0.297}, {"rep": "Jerry", "store": "\u91d1\u76c3", "contract": 400000.0, "actual": 237096.0, "rate": 0.59274}, {"rep": "Jerry", "store": "\u6dfb\u9152", "contract": 700000.0, "actual": 370426.0, "rate": 0.52918}, {"rep": "Jerry", "store": "\u4e99\u9e97", "contract": 400000.0, "actual": 201281.0, "rate": 0.5032025}, {"rep": "Jerry", "store": "\u9152\u8993", "contract": 400000.0, "actual": 130374.0, "rate": 0.325935}, {"rep": "Jerry", "store": "\u6625\u6cf0\u884c", "contract": 700000.0, "actual": 493558.0, "rate": 0.7050828571428571}, {"rep": "Jerry", "store": "\u4e00\u4e03\u96f6\u4e5d", "contract": 700000.0, "actual": 490125.0, "rate": 0.7001785714285714}, {"rep": "Jerry", "store": "\u9152\u591a\u6a02", "contract": 700000.0, "actual": 689394.0, "rate": 0.9848485714285714}, {"rep": "Jerry", "store": "\u4e0a\u9187", "contract": 1400000.0, "actual": 478140.0, "rate": 0.3415285714285714}, {"rep": "Jerry", "store": "\u9ea5\u5fb7\u91cc", "contract": 400000.0, "actual": 158784.0, "rate": 0.39696}, {"rep": "Jerry", "store": "\u611b\u9152\u7aa9", "contract": 400000.0, "actual": 21279.0, "rate": 0.0531975}, {"rep": "Eric", "store": "\u53e4\u5178", "contract": 400000.0, "actual": 184418.0, "rate": 0.461045}, {"rep": "Eric", "store": "\u541b\u8588", "contract": 700000.0, "actual": 460856.7142857143, "rate": 0.6583667346938776}, {"rep": "Eric", "store": "\u65e5\u4eab", "contract": 1400000.0, "actual": 965122.5714285714, "rate": 0.6893732653061224}, {"rep": "Eric", "store": "\u4e09\u5144\u5f1f", "contract": 700000.0, "actual": 401520.0, "rate": 0.5736}, {"rep": "Eric", "store": "\u5b8f\u4e9e-\u535a\u9152\u840a", "contract": 1400000.0, "actual": 1240188.8571428573, "rate": 0.8858491836734694}, {"rep": "Eric", "store": "\u7f8e\u6eff", "contract": 1400000.0, "actual": 626802.0, "rate": 0.4477157142857143}, {"rep": "Eric", "store": "\u5de7\u5de7", "contract": 1400000.0, "actual": 499659.7142857143, "rate": 0.35689979591836735}, {"rep": "Eric", "store": "\u5a01\u58eb\u5fcc\u5148\u751f", "contract": 1400000.0, "actual": 927920.0, "rate": 0.6628}, {"rep": "Eric", "store": "\u5357\u5340\u694a", "contract": 400000.0, "actual": 143160.0, "rate": 0.3579}, {"rep": "Eric", "store": "\u552f\u541b(\u6b23\u5dde)", "contract": 700000.0, "actual": 599490.0, "rate": 0.8564142857142857}, {"rep": "Eric", "store": "\u83ef\u5a01", "contract": 400000.0, "actual": 99960.0, "rate": 0.2499}, {"rep": "Eric", "store": "\u5bb8\u9038", "contract": 400000.0, "actual": 159660.0, "rate": 0.39915}, {"rep": "Eric", "store": "\u91d1\u99ac", "contract": 400000.0, "actual": 303500.0, "rate": 0.75875}, {"rep": "Jayden", "store": "\u9152\u6c5f\u6751", "contract": 700000.0, "actual": 186216.0, "rate": 0.2660228571428571}, {"rep": "Jayden", "store": "\u5168\u7403", "contract": 1400000.0, "actual": 0.0, "rate": 0.0}, {"rep": "Jayden", "store": "\u5927\u767b", "contract": 1400000.0, "actual": 400200.0, "rate": 0.28585714285714287}, {"rep": "Jayden", "store": "\u76db\u7d05", "contract": 400000.0, "actual": 212378.0, "rate": 0.530945}, {"rep": "Jayden", "store": "\u9245\u6d0b", "contract": 400000.0, "actual": 0.0, "rate": 0.0}, {"rep": "Jayden", "store": "\u6607\u54c1", "contract": 400000.0, "actual": 0.0, "rate": 0.0}, {"rep": "Jayden", "store": "\u4e09\u6876", "contract": 400000.0, "actual": 147562.0, "rate": 0.368905}, {"rep": "Jayden", "store": "\u7cbe\u6e5b", "contract": 400000.0, "actual": 205432.0, "rate": 0.51358}, {"rep": "Jayden", "store": "\u5c0f\u6797\u9152(\u4e0a\u591a)", "contract": 700000.0, "actual": 459492.0, "rate": 0.6564171428571428}, {"rep": "Jayden", "store": "\u900d\u9059", "contract": 400000.0, "actual": 257629.0, "rate": 0.6440725}, {"rep": "Jayden", "store": "\u7d05\u9152\u838a", "contract": 1400000.0, "actual": 853377.0, "rate": 0.609555}, {"rep": "Jayden", "store": "\u9152\u6e56", "contract": 400000.0, "actual": 271820.0, "rate": 0.67955}, {"rep": "Wei", "store": "\u548c\u6613", "contract": 700000.0, "actual": 850220.2857142857, "rate": 1.2146004081632653}, {"rep": "Wei", "store": "\u9f13\u5c71\u838a", "contract": 700000.0, "actual": 358262.0, "rate": 0.5118028571428571}, {"rep": "Wei", "store": "\u79be\u7a69", "contract": 1400000.0, "actual": 1090973.0, "rate": 0.7792664285714286}, {"rep": "Wei", "store": "\u5357\u5a01\u6d77", "contract": 400000.0, "actual": 227272.0, "rate": 0.56818}, {"rep": "Wei", "store": "\u5bb8\u6cf0", "contract": 400000.0, "actual": 316658.0, "rate": 0.791645}, {"rep": "Wei", "store": "\u51a0\u83ef", "contract": 700000.0, "actual": 638178.0, "rate": 0.9116828571428571}, {"rep": "Wei", "store": "\u96b1\u7396\u751f\u6d3b", "contract": 400000.0, "actual": 248993.0, "rate": 0.6224825}, {"rep": "Wei", "store": "\u88d5\u965e", "contract": 700000.0, "actual": 631578.0, "rate": 0.9022542857142857}, {"rep": "Wei", "store": "\u632f\u660c", "contract": 400000.0, "actual": 446617.0, "rate": 1.1165425}, {"rep": "Wei", "store": "\u51a0\u5fb7", "contract": 400000.0, "actual": 426204.0, "rate": 1.06551}, {"rep": "Wei", "store": "\u5609\u582d", "contract": 700000.0, "actual": 502620.0, "rate": 0.7180285714285715}, {"rep": "Wei", "store": "\u54c1\u946b", "contract": 400000.0, "actual": 246792.0, "rate": 0.61698}, {"rep": "Wei", "store": "\u67cf\u68ee", "contract": 400000.0, "actual": 124896.0, "rate": 0.31224}, {"rep": "Wei", "store": "\u4f73\u9152\u838a", "contract": 400000.0, "actual": 54120.0, "rate": 0.1353}, {"rep": "Yi", "store": "\u5c1a\u5b8f", "contract": 400000.0, "actual": 411840.0, "rate": 1.0296}, {"rep": "Yi", "store": "\u4e45\u666f", "contract": 400000.0, "actual": 751186.7142857143, "rate": 1.8779667857142859}, {"rep": "Yi", "store": "\u9187\u7235", "contract": 400000.0, "actual": 300600.0, "rate": 0.7515}, {"rep": "Yi", "store": "\u5927\u5927", "contract": 400000.0, "actual": 230859.0, "rate": 0.5771475}, {"rep": "Yi", "store": "\u91d1\u5bcc\u7965", "contract": 400000.0, "actual": 451202.0, "rate": 1.128005}, {"rep": "Yi", "store": "\u6b50\u7f8e", "contract": 400000.0, "actual": 220310.0, "rate": 0.550775}], "big_mouth_stores": [{"rep": "Jerry", "store": "Jerry", "contract_qty": 0, "actual_qty": 0, "contract": 769536.0, "actual": 422976.0, "rate": 0.7000000000000001}, {"rep": "Jerry", "store": "\u5564\u9152\u5927\u5b78", "contract_qty": 360, "actual_qty": 276, "contract": 302400.0, "actual": 231840.0, "rate": 0.7666666666666667}, {"rep": "Jerry", "store": "\u5564\u9152\u5927\u5b782", "contract_qty": 360, "actual_qty": 120, "contract": 419040.0, "actual": 139680.0, "rate": 0.3333333333333333}, {"rep": "Jerry", "store": "\u91d1\u9152\u6bbf", "contract_qty": 24, "actual_qty": 24, "contract": 27936.0, "actual": 27936.0, "rate": 1.0}, {"rep": "Jerry", "store": "\u946b\u751f\u6d3b", "contract_qty": 24, "actual_qty": 28, "contract": 20160.0, "actual": 23520.0, "rate": 1.1666666666666667}, {"rep": "Emily", "store": "Emily", "contract_qty": 0, "actual_qty": 0, "contract": 371983.999992, "actual": 351559.999992, "rate": 0.9425925925925926}, {"rep": "Emily", "store": "\u6df6\u6df6", "contract_qty": 60, "actual_qty": 60, "contract": 69840.0, "actual": 69840.0, "rate": 1.0}, {"rep": "Emily", "store": "\u6df6\u6df62", "contract_qty": 24, "actual_qty": 20, "contract": 20160.0, "actual": 16800.0, "rate": 0.8333333333333334}, {"rep": "Emily", "store": "3Q", "contract_qty": 120, "actual_qty": 108, "contract": 100800.0, "actual": 90720.0, "rate": 0.9}, {"rep": "Emily", "store": "\u6842\u51a0\u9152\u838a", "contract_qty": 24, "actual_qty": 12, "contract": 27936.0, "actual": 13968.0, "rate": 0.5}, {"rep": "Emily", "store": "\u963f\u723e\u767c", "contract_qty": 24, "actual_qty": 6, "contract": 27936.0, "actual": 6984.0, "rate": 0.25}, {"rep": "Emily", "store": "\u5955\u946b\u884c", "contract_qty": 24, "actual_qty": 24, "contract": 27936.0, "actual": 27936.0, "rate": 1.0}, {"rep": "Emily", "store": "\u6021\u548c", "contract_qty": 24, "actual_qty": 24, "contract": 20160.0, "actual": 20160.0, "rate": 1.0}, {"rep": "Emily", "store": "\u5a01\u82d1", "contract_qty": 24, "actual_qty": 48, "contract": 27936.0, "actual": 55872.0, "rate": 2.0}, {"rep": "Emily", "store": "\u5a01\u82d12", "contract_qty": 24, "actual_qty": 24, "contract": 49279.999992, "actual": 49279.999992, "rate": 1.0}, {"rep": "Jayden", "store": "Jayden", "contract_qty": 0, "actual_qty": 0, "contract": 1232352.0, "actual": 1342644.0, "rate": 0.0}, {"rep": "Jayden", "store": "\u7687\u54c1", "contract_qty": 24, "actual_qty": 24, "contract": 20160.0, "actual": 20160.0, "rate": 1.0}, {"rep": "Jayden", "store": "\u6587\u7965", "contract_qty": 120, "actual_qty": 204, "contract": 56520.0, "actual": 96084.0, "rate": 1.7}, {"rep": "Jayden", "store": "\u9152\u88d5", "contract_qty": 60, "actual_qty": 60, "contract": 50400.0, "actual": 50400.0, "rate": 1.0}, {"rep": "Jayden", "store": "\u6587\u79652", "contract_qty": 240, "actual_qty": 266, "contract": 201600.0, "actual": 223440.0, "rate": 1.1083333333333334}, {"rep": "Jayden", "store": "\u559c\u6d0b\u6d0b", "contract_qty": 60, "actual_qty": 60, "contract": 50400.0, "actual": 50400.0, "rate": 1.0}, {"rep": "Jayden", "store": "\u539f\u529b", "contract_qty": 360, "actual_qty": 420, "contract": 419040.0, "actual": 488880.0, "rate": 1.1666666666666667}, {"rep": "Jayden", "store": "\u5409\u7acb", "contract_qty": 60, "actual_qty": 66, "contract": 69840.0, "actual": 76824.0, "rate": 1.1}, {"rep": "Jayden", "store": "\u6587\u79653", "contract_qty": 240, "actual_qty": 216, "contract": 279360.0, "actual": 251424.0, "rate": 0.9}, {"rep": "Jayden", "store": "\u827e\u96f7", "contract_qty": 24, "actual_qty": 24, "contract": 27936.0, "actual": 27936.0, "rate": 1.0}, {"rep": "Jayden", "store": "\u5b89\u8fea", "contract_qty": 24, "actual_qty": 24, "contract": 29160.0, "actual": 29160.0, "rate": 1.0}, {"rep": "Jayden", "store": "\u9152\u6e2f(\u5168\u597d\u884c)", "contract_qty": 24, "actual_qty": 24, "contract": 27936.0, "actual": 27936.0, "rate": 1.0}, {"rep": "Eric", "store": "Eric", "contract_qty": 0, "actual_qty": 0, "contract": 2456712.0, "actual": 2631792.0, "rate": 1.1442708333333331}, {"rep": "Eric", "store": "\u675c\u5eb7-\u6597\u516d", "contract_qty": 240, "actual_qty": 240, "contract": 201600.0, "actual": 201600.0, "rate": 1.0}, {"rep": "Eric", "store": "\u675c\u5eb7-\u6210\u529f", "contract_qty": 240, "actual_qty": 240, "contract": 201600.0, "actual": 201600.0, "rate": 1.0}, {"rep": "Eric", "store": "\u91d1\u99ac", "contract_qty": 240, "actual_qty": 240, "contract": 201600.0, "actual": 201600.0, "rate": 1.0}, {"rep": "Eric", "store": "\u9152\u5c1a", "contract_qty": 360, "actual_qty": 384, "contract": 419040.0, "actual": 446976.0, "rate": 1.0666666666666667}, {"rep": "Eric", "store": "\u9152\u5c1a2", "contract_qty": 24, "actual_qty": 24, "contract": 20160.0, "actual": 20160.0, "rate": 1.0}, {"rep": "Eric", "store": "\u5c0b\u9152\u8da3", "contract_qty": 240, "actual_qty": 240, "contract": 201600.0, "actual": 201600.0, "rate": 1.0}, {"rep": "Eric", "store": "\u5c0b\u9152\u8da32", "contract_qty": 360, "actual_qty": 360, "contract": 419040.0, "actual": 419040.0, "rate": 1.0}, {"rep": "Eric", "store": "\u9686\u8c50", "contract_qty": 120, "actual_qty": 144, "contract": 56520.0, "actual": 67824.0, "rate": 1.2}, {"rep": "Eric", "store": "\u9686\u8c502", "contract_qty": 24, "actual_qty": 34, "contract": 27936.0, "actual": 39576.0, "rate": 1.4166666666666667}, {"rep": "Eric", "store": "\u6e90\u9109\u884c", "contract_qty": 120, "actual_qty": 180, "contract": 139680.0, "actual": 209520.0, "rate": 1.5}, {"rep": "Eric", "store": "\u6e90\u9109\u884c2", "contract_qty": 24, "actual_qty": 48, "contract": 29160.0, "actual": 58320.0, "rate": 2.0}, {"rep": "Eric", "store": "\u842c\u6876", "contract_qty": 240, "actual_qty": 270, "contract": 201600.0, "actual": 226800.0, "rate": 1.125}, {"rep": "Eric", "store": "\u9152\u5c0a", "contract_qty": 24, "actual_qty": 24, "contract": 20160.0, "actual": 20160.0, "rate": 1.0}, {"rep": "Eric", "store": "\u9152\u5c0a2", "contract_qty": 24, "actual_qty": 24, "contract": 27936.0, "actual": 27936.0, "rate": 1.0}, {"rep": "Eric", "store": "\u9752\u65fa", "contract_qty": 24, "actual_qty": 24, "contract": 20160.0, "actual": 20160.0, "rate": 1.0}, {"rep": "Eric", "store": "\u4e03\u4e03\u6703\u793e", "contract_qty": 24, "actual_qty": 24, "contract": 20160.0, "actual": 20160.0, "rate": 1.0}, {"rep": "Eric", "store": "\u963f\u6e05\u67d1\u4ed4\u5e97", "contract_qty": 24, "actual_qty": 24, "contract": 27936.0, "actual": 27936.0, "rate": 1.0}, {"rep": "Eric", "store": "\u6c9b\u7dc1", "contract_qty": 24, "actual_qty": 24, "contract": 11304.0, "actual": 11304.0, "rate": 1.0}, {"rep": "Eric", "store": "\u4e09\u767c\u6d0b\u884c", "contract_qty": 120, "actual_qty": 120, "contract": 139680.0, "actual": 139680.0, "rate": 1.0}, {"rep": "Eric", "store": "\u52a0\u7d0d", "contract_qty": 60, "actual_qty": 60, "contract": 69840.0, "actual": 69840.0, "rate": 1.0}, {"rep": "Eric", "store": "\u7f8e\u611f\u81e8\u9152", "contract_qty": 24, "actual_qty": 24, "contract": 20160.0, "actual": 20160.0, "rate": 1.0}, {"rep": "Eric", "store": "\u6842\u51a0", "contract_qty": 60, "actual_qty": 64, "contract": 50400.0, "actual": 53760.0, "rate": 1.0666666666666667}, {"rep": "Eric", "store": "\u83ef\u5bcc", "contract_qty": 120, "actual_qty": 144, "contract": 139680.0, "actual": 167616.0, "rate": 1.2}, {"rep": "Wei", "store": "Wei", "contract_qty": 0, "actual_qty": 0, "contract": 221760.0, "actual": 231840.0, "rate": 1.25}, {"rep": "Wei", "store": "\u5442\u8a18", "contract_qty": 240, "actual_qty": 240, "contract": 201600.0, "actual": 201600.0, "rate": 1.0}, {"rep": "Wei", "store": "\u9091\u6771", "contract_qty": 24, "actual_qty": 36, "contract": 20160.0, "actual": 30240.0, "rate": 1.5}, {"rep": "Yi", "store": "Yi", "contract_qty": 0, "actual_qty": 0, "contract": 0.0, "actual": 0.0, "rate": 0.0}]};
+
 var REPS=["Jerry","Emily","Eric","Jayden","Wei","Yi"];
-var ACTS=["年特案","彈性年約","大口活動"];
-var ACT_CLS=["ts","tf","tb"];
-function go(n){document.querySelectorAll(".page").forEach(function(p){p.classList.remove("active")});document.getElementById("p"+n).classList.add("active");window.scrollTo(0,0)}
-function fmt(n){return n==null?"-":Math.round(n).toLocaleString("zh-TW")}
-function pct(r){return r==null?"-":(r*100).toFixed(1)+"%"}
-function bc(r){return r>=1?"g":r>=0.6?"y":"r"}
-function fc(r){return r>=1?"fb":r>=0.6?"fg":r>=0.3?"fy":"fr"}
-function fw(r){return Math.min(r*100,100)+"%"}
-function el(id){return document.getElementById(id)}
+var ACTS=["\u5e74\u7279\u6848","\u5f48\u6027\u5e74\u7d04","\u5927\u53e3\u6d3b\u52d5"];
+var curRep=-1,curAct=-1;
 
-function repStats(rep){
-  var tc=0,ta=0,cnt=[0,0,0];
-  D.spec_stores.forEach(function(s){if(s.rep===rep){tc+=s.contract;ta+=s.actual;cnt[0]++}});
-  D.flex_stores.forEach(function(s){if(s.rep===rep){tc+=s.contract;ta+=s.total;cnt[1]++}});
-  D.big_mouth_stores.forEach(function(s){if(s.rep===rep){tc+=s.contract;ta+=s.actual;cnt[2]++}});
-  return {tc:tc,ta:ta,rate:tc?ta/tc:0,cnt:cnt};
+function fmt(n){if(n==null)return'-';var v=Math.round(n);return v>=1000000?'$'+(v/1000000).toFixed(2)+'M':'$'+v.toLocaleString();}
+function fmtFull(n){return n==null?'-':'$'+Math.round(n).toLocaleString();}
+function pct(r){return r==null?'-':(r*100).toFixed(1)+'%';}
+function bc(r){return r>=0.55?'g':r>=0.2?'w':'r';}
+function chipHtml(r){
+  if(r==null)return'';
+  var p=r*100,c=p>=55?'g':p>=20?'w':'r';
+  return '<span class="chip '+c+'">'+p.toFixed(0)+'%</span>';
 }
-function grandTotal(){
-  var tc=0,ta=0;
-  D.spec_stores.forEach(function(s){tc+=s.contract;ta+=s.actual});
-  D.flex_stores.forEach(function(s){tc+=s.contract;ta+=s.total});
-  D.big_mouth_stores.forEach(function(s){tc+=s.contract;ta+=s.actual});
-  return {tc:tc,ta:ta,rate:tc?ta/tc:0};
+function barFill(r){
+  var w=Math.min(100,Math.max(0,r*100)).toFixed(1);
+  return '<div class="bar-fill '+bc(r)+'" style="width:'+w+'%"></div>';
 }
-function actStores(repName,actIdx){
-  if(actIdx===0) return D.spec_stores.filter(function(s){return s.rep===repName});
-  if(actIdx===1) return D.flex_stores.filter(function(s){return s.rep===repName});
-  return D.big_mouth_stores.filter(function(s){return s.rep===repName});
+function bar(r){return '<div class="bar-track" style="margin-top:10px">'+barFill(r)+'</div>';}
+
+function showTab(t){
+  document.querySelectorAll('.nav button').forEach(function(b,i){b.classList.toggle('active',i===t);});
+  document.querySelectorAll('.page').forEach(function(p,i){p.classList.toggle('active',i===t);});
+  if(t===0){curRep=-1;renderReps();}
+  if(t===1)renderActs(curRep>=0?curRep:null);
 }
-function actSum(stores,actIdx){
-  var tc=0,ta=0;
-  stores.forEach(function(s){tc+=s.contract;ta+=(actIdx===1?s.total:s.actual)});
-  return {tc:tc,ta:ta,rate:tc?ta/tc:0};
+function actStores(j,rep){
+  var arr=j===0?D.spec_stores:j===1?D.flex_stores:D.big_mouth_stores;
+  return rep!=null?arr.filter(function(s){return s.rep===rep;}):arr;
+}
+function totals(stores){
+  var tc=stores.reduce(function(a,s){return a+s.contract;},0);
+  var ta=stores.reduce(function(a,s){return a+s.actual;},0);
+  return{tc:tc,ta:ta,rate:tc>0?ta/tc:0};
 }
 
-function renderP1(){
-  var g=grandTotal();
-  var h='<div class="sum"><div class="sumt">全員總計</div>';
-  h+='<div class="bar"><div class="fill '+fc(g.rate)+'" style="width:'+fw(g.rate)+'"></div></div>';
-  h+='<div class="stats"><span>合約 $'+fmt(g.tc)+'</span><span style="color:#e6edf3;font-weight:600">'+pct(g.rate)+'</span><span>進貨 $'+fmt(g.ta)+'</span></div></div>';
+function sumBox(stores,label){
+  var t=totals(stores);
+  var c=bc(t.rate);
+  var rateColor=c==='g'?'var(--green)':c==='w'?'var(--amber)':'var(--red)';
+  return '<div class="sum-box">'
+    +'<div class="sum-label">'+label+' &nbsp;·&nbsp; '+stores.length+' \u5bb6\u5e97</div>'
+    +'<div class="sum-grid">'
+    +'<div class="sum-item"><div class="sum-val">'+fmt(t.tc)+'</div><div class="sum-lbl">\u5408\u7d04\u7e3d\u984d</div></div>'
+    +'<div class="sum-item"><div class="sum-val">'+fmt(t.ta)+'</div><div class="sum-lbl">\u5be6\u969b\u9032\u8ca8</div></div>'
+    +'<div class="sum-item" style="grid-column:1/-1"><div class="sum-val" style="font-size:22px;color:'+rateColor+'">'+pct(t.rate)+'</div><div class="sum-lbl">\u6574\u9ad4\u9054\u6210\u7387</div></div>'
+    +'</div>'
+    +'<div class="bar-track">'+barFill(t.rate)+'</div>'
+    +'</div>';
+}
+
+// ── Page 0: Rep list ──────────────────────────────────────────────
+function renderReps(){
+  var allS=D.spec_stores.concat(D.flex_stores).concat(D.big_mouth_stores);
+  var h='<div class="pg-title">\u696d\u52d9\u7e3d\u89bd</div>';
+  h+=sumBox(allS,'\u5168\u90e8\u6d3b\u52d5');
   REPS.forEach(function(rep,i){
-    var st=repStats(rep);
-    h+='<div class="card" onclick="openRep('+i+')">';
-    h+='<div class="row"><span class="name">'+rep+'</span><span class="badge '+bc(st.rate)+'">'+pct(st.rate)+'</span></div>';
-    h+='<div class="bar"><div class="fill '+fc(st.rate)+'" style="width:'+fw(st.rate)+'"></div></div>';
-    h+='<div class="stats"><span>合約 $'+fmt(st.tc)+'</span><span>進貨 $'+fmt(st.ta)+'</span></div>';
-    var tags="";
-    ACTS.forEach(function(a,j){if(st.cnt[j]>0)tags+='<span class="'+ACT_CLS[j]+'">'+a+" "+st.cnt[j]+"</span>"});
-    h+='<div class="tags">'+tags+"</div></div>";
+    var rs=allS.filter(function(s){return s.rep===rep;});
+    var t=totals(rs);
+    var c=bc(t.rate);
+    var lc=c==='g'?'var(--green)':c==='w'?'var(--amber)':'var(--red)';
+    h+='<div class="card" onclick="openRep('+i+')" style="border-left-color:'+lc+'">';
+    h+='<div class="card-top">';
+    h+='<div><div class="card-name">'+rep+'</div>';
+    h+='<div class="card-meta"><b>\u5408\u7d04</b> '+fmt(t.tc)+'&nbsp;&nbsp;<b>\u9054\u6210</b> '+fmt(t.ta)+'</div></div>';
+    h+='<div class="card-rate-big" style="color:'+lc+'">'+pct(t.rate)+'</div>';
+    h+='</div>';
+    h+=bar(t.rate);
+    h+='</div>';
   });
-  el("c1").innerHTML=h;
+  document.getElementById('p0').innerHTML=h;
 }
 
 function openRep(i){
-  curRepIdx=i;
-  var rep=REPS[i];
-  var st=repStats(rep);
-  el("t2").textContent=rep+" 的活動";
-  el("s2").textContent="點選活動查看店家列表";
-  var h='<div class="sum"><div class="sumt">'+rep+" 合計</div>";
-  h+='<div class="bar"><div class="fill '+fc(st.rate)+'" style="width:'+fw(st.rate)+'"></div></div>';
-  h+='<div class="stats"><span>合約 $'+fmt(st.tc)+'</span><span style="color:#e6edf3;font-weight:600">'+pct(st.rate)+'</span><span>進貨 $'+fmt(st.ta)+'</span></div></div>';
+  curRep=i;
+  document.querySelectorAll('.nav button').forEach(function(b,j){b.classList.toggle('active',j===1);});
+  document.querySelectorAll('.page').forEach(function(p,j){p.classList.toggle('active',j===1);});
+  renderActs(i);
+}
+
+// ── Page 1: Act list ──────────────────────────────────────────────
+function renderActs(repIdx){
+  var rep=repIdx!=null&&repIdx>=0?REPS[repIdx]:null;
+  var h='';
+  if(rep){
+    h+='<button class="back-btn" onclick="backToReps()">\u8fd4\u56de\u696d\u52d9</button>';
+    h+='<div class="pg-title">'+rep+' \u7684\u6d3b\u52d5</div>';
+  } else {
+    h+='<div class="pg-title">\u6d3b\u52d5\u6982\u89bd</div>';
+  }
+  var allRepS=rep
+    ?D.spec_stores.concat(D.flex_stores).concat(D.big_mouth_stores).filter(function(s){return s.rep===rep;})
+    :D.spec_stores.concat(D.flex_stores).concat(D.big_mouth_stores);
+  h+=sumBox(allRepS, rep?rep+' \u5168\u6d3b\u52d5':'\u6240\u6709\u696d\u52d9');
   ACTS.forEach(function(act,j){
-    var stores=actStores(rep,j);
-    if(!stores.length) return;
-    var as=actSum(stores,j);
-    h+='<div class="card" onclick="openAct('+j+')">';
-    h+='<div class="row"><span><span class="'+ACT_CLS[j]+'" style="margin-right:6px">'+act+'</span></span><span class="cnt">'+stores.length+" 家</span></div>";
-    h+='<div class="bar"><div class="fill '+fc(as.rate)+'" style="width:'+fw(as.rate)+'"></div></div>';
-    h+='<div class="stats"><span>合約 $'+fmt(as.tc)+'</span><span class="badge '+bc(as.rate)+'">'+pct(as.rate)+'</span><span>進貨 $'+fmt(as.ta)+'</span></div></div>';
+    var stores=actStores(j,rep);
+    var t=totals(stores);
+    var c=bc(t.rate);
+    var lc=c==='g'?'var(--green)':c==='w'?'var(--amber)':'var(--red)';
+    h+='<div class="card" onclick="openAct('+j+','+repIdx+')" style="border-left-color:'+lc+'">';
+    h+='<div class="card-top">';
+    h+='<div><div class="card-name">'+act+'</div>';
+    h+='<div class="card-meta"><b>\u5e97\u5bb6</b> '+stores.length+'&nbsp;&nbsp;<b>\u5408\u7d04</b> '+fmt(t.tc)+'</div></div>';
+    h+='<div class="card-rate-big" style="color:'+lc+'">'+pct(t.rate)+'</div>';
+    h+='</div>';
+    h+=bar(t.rate);
+    h+='</div>';
   });
-  el("c2").innerHTML=h;
-  go(2);
+  document.getElementById('p1').innerHTML=h;
 }
 
-function openAct(j){
-  curActIdx=j;
-  var rep=REPS[curRepIdx];
-  var act=ACTS[j];
-  el("t3").textContent=rep+" · "+act;
-  el("s3").textContent="依合約金額排序 ↓";
-  var stores=actStores(rep,j).map(function(s,idx){return{s:s,idx:idx}}).sort(function(a,b){return b.s.contract-a.s.contract});
-  window._sl=stores.map(function(x){return x.s});
-  var h="";
-  if(!stores.length) h='<div style="text-align:center;padding:40px;color:#8b949e">此業務無此活動資料</div>';
-  stores.forEach(function(x,rank){
-    var s=x.s;
-    var actual=j===1?s.total:s.actual;
-    var extra=j===1?"方案"+s.plan+(s.result_q2?" Q2:"+s.result_q2:""):(j===2?s.item:"");
-    h+='<div class="scard" onclick="openStore('+rank+')">';
-    h+='<div class="row"><span class="rank">'+(rank+1)+'</span><span class="sname">'+s.store+'</span>';
-    if(extra) h+='<span class="plan">'+extra+'</span>';
-    h+='<span class="badge '+bc(s.rate)+'">'+pct(s.rate)+'</span></div>';
-    h+='<div class="bar"><div class="fill '+fc(s.rate)+'" style="width:'+fw(s.rate)+'"></div></div>';
-    h+='<div class="stats"><span>合約 $'+fmt(s.contract)+'</span><span>進貨 $'+fmt(actual)+'</span></div></div>';
-  });
-  el("c3").innerHTML=h;
-  go(3);
+// ── Page 2: Store list ────────────────────────────────────────────
+function openAct(j,repIdx){
+  curAct=j;
+  var rep=repIdx!=null&&repIdx>=0?REPS[repIdx]:null;
+  renderStoreList(actStores(j,rep),repIdx,j);
 }
 
+function renderStoreList(stores,repIdx,actIdx){
+  document.querySelectorAll('.nav button').forEach(function(b,i){b.classList.toggle('active',i===2);});
+  document.querySelectorAll('.page').forEach(function(p,i){p.classList.toggle('active',i===2);});
+  var sorted=stores.slice().sort(function(a,b){return b.contract-a.contract;});
+  var rep=repIdx!=null&&repIdx>=0?REPS[repIdx]:null;
+  var label=ACTS[actIdx]+(rep?' / '+rep:'');
+  var h='<button class="back-btn" onclick="backToActs('+repIdx+')">\u8fd4\u56de\u6d3b\u52d5</button>';
+  h+='<div class="pg-title">'+label+' \u5e97\u5bb6</div>';
+  h+=sumBox(sorted,label);
+  if(!sorted.length){h+='<div class="empty">\u7121\u8cc7\u6599</div>';}
+  else{
+    sorted.forEach(function(s,rank){
+      var r=s.rate!=null?s.rate:(s.contract>0?s.actual/s.contract:0);
+      var c=bc(r),lc=c==='g'?'var(--green)':c==='w'?'var(--amber)':'var(--red)';
+      h+='<div class="scard" onclick="openStore('+rank+')">';
+      h+='<div class="rank">'+(rank+1)+'</div>';
+      h+='<div class="scard-body">';
+      h+='<div class="scard-name">'+s.store+'</div>';
+      h+='<div class="scard-sub">'+s.rep+chipHtml(r)+'</div>';
+      h+=bar(r);
+      h+='</div>';
+      h+='<div class="scard-right">';
+      h+='<div class="scard-amt">'+fmt(s.contract)+'</div>';
+      h+='<div class="scard-rem" style="color:'+lc+'">'+pct(r)+'</div>';
+      h+='</div>';
+      h+='</div>';
+    });
+  }
+  window.__storeList=sorted;
+  window.__storeRepIdx=repIdx;
+  window.__storeActIdx=actIdx;
+  document.getElementById('p2').innerHTML=h;
+}
+
+// ── Page 3: Store detail ──────────────────────────────────────────
 function openStore(rank){
-  var s=window._sl[rank];
-  var j=curActIdx;
-  var actual=j===1?s.total:s.actual;
-  el("t4").textContent=s.store;
-  el("s4").textContent=REPS[curRepIdx]+" · "+ACTS[j];
-  var h='<div class="ds"><div class="dt">概況</div>';
-  h+='<div class="bar" style="margin-bottom:8px"><div class="fill '+fc(s.rate)+'" style="width:'+fw(s.rate)+'"></div></div>';
-  h+='<div class="dr"><span class="dl">合約金額</span><span class="dv">$'+fmt(s.contract)+'</span></div>';
-  h+='<div class="dr"><span class="dl">已進貨金額</span><span class="dv">$'+fmt(actual)+'</span></div>';
-  h+='<div class="dr"><span class="dl">達成率</span><span class="dv"><span class="badge '+bc(s.rate)+'">'+pct(s.rate)+'</span></span></div>';
-  if(j===1){
-    h+='<div class="dr"><span class="dl">方案</span><span class="dv">'+s.plan+'</span></div>';
-    h+='<div class="dr"><span class="dl">Q1進貨</span><span class="dv">$'+fmt(s.q1)+'</span></div>';
-    h+='<div class="dr"><span class="dl">Q2進貨</span><span class="dv">$'+fmt(s.q2)+'</span></div>';
-    if(s.result_q1) h+='<div class="dr"><span class="dl">Q1結案</span><span class="dv">'+s.result_q1+'</span></div>';
-    if(s.result_q2) h+='<div class="dr"><span class="dl">Q2結案</span><span class="dv">'+s.result_q2+'</span></div>';
+  var s=window.__storeList[rank];
+  var actIdx=window.__storeActIdx;
+  var isBig=actIdx===2;
+  var r=s.rate!=null?s.rate:(s.contract>0?s.actual/s.contract:0);
+  var c=bc(r),lc=c==='g'?'var(--green)':c==='w'?'var(--amber)':'var(--red)';
+  document.querySelectorAll('.nav button').forEach(function(b,i){b.classList.toggle('active',i===2);});
+  document.querySelectorAll('.page').forEach(function(p,i){p.classList.toggle('active',i===3);});
+
+  var h='<button class="back-btn" onclick="backToStores()">\u8fd4\u56de\u5e97\u5bb6</button>';
+  h+='<div class="pg-title">'+ACTS[actIdx]+'</div>';
+  // headline
+  h+='<div style="margin-bottom:18px">';
+  h+='<div style="font-size:22px;font-weight:700;color:var(--tx);margin-bottom:4px">'+s.store+'</div>';
+  h+='<div style="font-size:13px;color:var(--tx2)">'+s.rep+chipHtml(r)+'</div>';
+  h+='</div>';
+  // big rate
+  h+='<div style="background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center">';
+  h+='<div style="font-family:var(--mono);font-size:48px;font-weight:500;color:'+lc+';line-height:1">'+pct(r)+'</div>';
+  h+='<div style="font-size:11px;color:var(--tx2);margin-top:6px;letter-spacing:.1em">\u9054\u6210\u7387</div>';
+  h+='<div class="bar-track" style="margin-top:14px"><div class="bar-fill '+c+'" style="width:'+Math.min(100,r*100).toFixed(1)+'%"></div></div>';
+  h+='</div>';
+  // detail kv
+  h+='<div class="det-box"><div class="det-title">\u5408\u7d04\u660e\u7d30</div>';
+  if(isBig){
+    h+='<div class="kv"><span class="kv-k">\u5408\u7d04\u6578\u91cf</span><span class="kv-v">'+s.contract_qty+'</span></div>';
+    h+='<div class="kv"><span class="kv-k">\u5be6\u969b\u6578\u91cf</span><span class="kv-v">'+s.actual_qty+'</span></div>';
   }
-  if(j===2&&s.item) h+='<div class="dr"><span class="dl">品項</span><span class="dv">'+s.item+'</span></div>';
-  h+="</div>";
-  if(j===0){
-    var monthly=D.store_monthly[s.store];
-    if(monthly){
-      h+='<div class="ds"><div class="dt">月度明細</div>';
-      [10,11,12,1,2,3].forEach(function(m){
-        var items=monthly[String(m)];
-        if(!items||!items.length) return;
-        var total=items.reduce(function(a,x){return a+x.amount},0);
-        h+='<div class="mr"><span class="ml">'+m+'月</span><div class="mi">';
-        items.forEach(function(it){h+=it.product+" × "+it.qty+"瓶<br>"});
-        h+='</div><span class="ma">$'+fmt(total)+'</span></div>';
-      });
-      h+="</div>";
-    }
-  }
-  el("c4").innerHTML=h;
-  go(4);
+  h+='<div class="kv"><span class="kv-k">\u5408\u7d04\u91d1\u984d</span><span class="kv-v">'+fmtFull(s.contract)+'</span></div>';
+  h+='<div class="kv"><span class="kv-k">\u5be6\u969b\u9032\u8ca8</span><span class="kv-v">'+fmtFull(s.actual)+'</span></div>';
+  h+='<div class="kv"><span class="kv-k">\u5c1a\u672a\u9054\u6a19</span><span class="kv-v" style="color:'+lc+'">'+fmtFull(Math.max(0,s.contract-s.actual))+'</span></div>';
+  h+='</div>';
+  document.getElementById('p3').innerHTML=h;
 }
 
-renderP1();
+function backToReps(){
+  curRep=-1;
+  document.querySelectorAll('.nav button').forEach(function(b,i){b.classList.toggle('active',i===0);});
+  document.querySelectorAll('.page').forEach(function(p,i){p.classList.toggle('active',i===0);});
+  renderReps();
+}
+function backToActs(repIdx){
+  document.querySelectorAll('.nav button').forEach(function(b,i){b.classList.toggle('active',i===1);});
+  document.querySelectorAll('.page').forEach(function(p,i){p.classList.toggle('active',i===1);});
+  renderActs(repIdx!=null&&repIdx>=0?repIdx:null);
+}
+function backToStores(){
+  document.querySelectorAll('.nav button').forEach(function(b,i){b.classList.toggle('active',i===2);});
+  document.querySelectorAll('.page').forEach(function(p,i){p.classList.toggle('active',i===2);});
+  renderStoreList(window.__storeList,window.__storeRepIdx,window.__storeActIdx);
+}
+
+renderReps();
 </script>
 </body>
 </html>
