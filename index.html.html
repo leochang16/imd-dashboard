@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>結案進度 Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:12px 16px;position:sticky;top:0;z-index:10}
+.header-row{display:flex;align-items:center;gap:10px}
+.back-btn{background:#21262d;border:1px solid #30363d;color:#8b949e;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:4px}
+.back-btn:hover{background:#30363d;color:#e6edf3}
+h1{font-size:16px;font-weight:600;color:#e6edf3;flex:1}
+.subtitle{font-size:12px;color:#8b949e;margin-top:2px}
+.container{padding:12px}
+/* Rep cards */
+.rep-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,background .2s}
+.rep-card:hover{border-color:#58a6ff;background:#1a2332}
+.rep-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rep-name{font-size:15px;font-weight:600}
+.rep-rate{font-size:13px;font-weight:600;padding:2px 8px;border-radius:12px}
+.rate-high{background:#1a4228;color:#3fb950}
+.rate-mid{background:#3d2c00;color:#d29922}
+.rate-low{background:#3d1a1a;color:#f85149}
+.progress-bar{background:#21262d;border-radius:3px;height:6px;overflow:hidden;margin-bottom:6px}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s}
+.fill-high{background:#3fb950}
+.fill-mid{background:#d29922}
+.fill-low{background:#f85149}
+.fill-over{background:#58a6ff}
+.rep-stats{display:flex;justify-content:space-between;font-size:11px;color:#8b949e}
+.rep-meta{font-size:11px;color:#8b949e;margin-top:4px}
+/* Summary bar at top */
+.summary-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px;margin-bottom:14px}
+.summary-title{font-size:12px;color:#8b949e;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.summary-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.summary-label{font-size:12px;color:#8b949e}
+.summary-val{font-size:12px;color:#e6edf3;font-weight:600}
+/* Activity cards */
+.activity-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,background .2s}
+.activity-card:hover{border-color:#58a6ff;background:#1a2332}
+.activity-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.activity-name{font-size:15px;font-weight:600}
+.activity-count{font-size:11px;color:#8b949e;background:#21262d;padding:2px 8px;border-radius:10px}
+/* Store list */
+.store-card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,background .2s}
+.store-card:hover{border-color:#58a6ff;background:#1a2332}
+.store-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.store-name{font-size:14px;font-weight:600}
+.store-plan{font-size:11px;color:#8b949e;background:#21262d;padding:1px 6px;border-radius:8px;margin-left:6px}
+.store-rate{font-size:12px;font-weight:600;padding:2px 7px;border-radius:10px}
+.store-stats{display:flex;justify-content:space-between;font-size:11px;color:#8b949e;margin-top:4px}
+/* Detail page */
+.detail-section{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px;margin-bottom:12px}
+.section-title{font-size:12px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.month-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #21262d}
+.month-row:last-child{border-bottom:none}
+.month-label{font-size:12px;color:#8b949e;min-width:24px}
+.month-items{flex:1;margin-left:10px}
+.month-item{font-size:12px;color:#e6edf3;margin-bottom:2px}
+.month-amount{font-size:12px;color:#58a6ff;font-weight:600;min-width:70px;text-align:right}
+.stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #21262d}
+.stat-row:last-child{border-bottom:none}
+.stat-label{font-size:13px;color:#8b949e}
+.stat-val{font-size:13px;color:#e6edf3;font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-green{background:#1a4228;color:#3fb950}
+.badge-red{background:#3d1a1a;color:#f85149}
+.badge-blue{background:#0d2d6e;color:#58a6ff}
+.badge-orange{background:#3d2c00;color:#d29922}
+.badge-grey{background:#21262d;color:#8b949e}
+.chevron{color:#8b949e;font-size:14px}
+.rank{font-size:11px;color:#8b949e;min-width:18px}
+.empty-state{text-align:center;padding:40px 20px;color:#8b949e;font-size:13px}
+.tag-spec{background:#0d2d6e;color:#58a6ff;border:1px solid #1f4a9e;font-size:10px;padding:1px 6px;border-radius:6px}
+.tag-flex{background:#1a3d1a;color:#3fb950;border:1px solid #2a5c2a;font-size:10px;padding:1px 6px;border-radius:6px}
+.tag-big{background:#3d1e00;color:#e67a1a;border:1px solid #5c3200;font-size:10px;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+
+<!-- Page 1: Rep Overview -->
+<div id="p1" class="page active">
+  <header>
+    <div class="header-row"><h1>結案進度 Dashboard</h1></div>
+    <div class="subtitle">FY26 業務總覽</div>
+  </header>
+  <div class="container" id="p1-content"></div>
+</div>
+
+<!-- Page 2: Activity List for Rep -->
+<div id="p2" class="page">
+  <header>
+    <div class="header-row">
+      <button class="back-btn" onclick="goTo(1)">◀ 返回</button>
+      <h1 id="p2-title">活動總覽</h1>
+    </div>
+    <div id="p2-subtitle" class="subtitle"></div>
+  </header>
+  <div class="container" id="p2-content"></div>
+</div>
+
+<!-- Page 3: Store List for Rep+Activity -->
+<div id="p3" class="page">
+  <header>
+    <div class="header-row">
+      <button class="back-btn" onclick="goTo(2)">◀ 返回</button>
+      <h1 id="p3-title">店家列表</h1>
+    </div>
+    <div id="p3-subtitle" class="subtitle"></div>
+  </header>
+  <div class="container" id="p3-content"></div>
+</div>
+
+<!-- Page 4: Store Detail -->
+<div id="p4" class="page">
+  <header>
+    <div class="header-row">
+      <button class="back-btn" onclick="goTo(3)">◀ 返回</button>
+      <h1 id="p4-title">店家詳情</h1>
+    </div>
+    <div id="p4-subtitle" class="subtitle"></div>
+  </header>
+  <div class="container" id="p4-content"></div>
+</div>
+
+<script>
+const D={"spec_stores":[{"rep":"Jerry","store":"買酒網","contract":2765949.0,"actual":1423996.0,"rate":0.5148,"type":"年特案"},{"rep":"Jerry","store":"昭業","contract":2791070.0,"actual":1785885.0,"rate":0.6399,"type":"年特案"},{"rep":"Jerry","store":"佳賀","contract":2728530.0,"actual":3096719.0,"rate":1.1349,"type":"年特案"},{"rep":"Jerry","store":"自立","contract":1002730.0,"actual":210016.0,"rate":0.2094,"type":"年特案"},{"rep":"Jerry","store":"礫石(青剛櫟)","contract":2517440.0,"actual":1478099.0,"rate":0.5871,"type":"年特案"},{"rep":"Emily","store":"偉成(曹文青)","contract":2503745.0,"actual":760856.0,"rate":0.3039,"type":"年特案"},{"rep":"Eric","store":"台元(佳亨)","contract":2500000.0,"actual":1436917.0,"rate":0.5748,"type":"年特案"},{"rep":"Jayden","store":"葡晶","contract":2500000.0,"actual":421345.0,"rate":0.1685,"type":"年特案"},{"rep":"Jayden","store":"美芝城(不倒翁)","contract":2500000.0,"actual":1462377.0,"rate":0.585,"type":"年特案"},{"rep":"Wei","store":"奕欣(600萬)","contract":6140010.0,"actual":4424577.0,"rate":0.7206,"type":"年特案"},{"rep":"Wei","store":"奕欣(400萬)","contract":4000000.0,"actual":918900.0,"rate":0.2297,"type":"年特案"},{"rep":"Yi","store":"寰亨","contract":5013820.0,"actual":4340047.0,"rate":0.8656,"type":"年特案"},{"rep":"Yi","store":"品翔","contract":1403297.0,"actual":465564.0,"rate":0.3318,"type":"年特案"},{"rep":"Emily","store":"洋酒城(GGN18)","contract":1920000.0,"actual":1920000.0,"rate":1.0,"type":"年特案"},{"rep":"Jayden","store":"美芝城(GGN25)","contract":315720.0,"actual":315720.0,"rate":1.0,"type":"年特案"},{"rep":"Jayden","store":"美芝城(GGN25)","contract":868230.0,"actual":868230.0,"rate":1.0,"type":"年特案"},{"rep":"Jayden","store":"美芝城(GGN18&21)","contract":2159300.0,"actual":2159300.0,"rate":1.0,"type":"年特案"},{"rep":"Emily","store":"18595728.999992","contract":11725711.0,"actual":1.0,"rate":0.1839,"type":"年特案"},{"rep":"Jerry","store":"20287255","contract":12854552.0,"actual":1.0,"rate":0.2016,"type":"年特案"},{"rep":"Jayden","store":"17918506","contract":9599969.0,"actual":1.0,"rate":0.1505,"type":"年特案"},{"rep":"Eric","store":"16056712","contract":10680967.0,"actual":1.0,"rate":0.1675,"type":"年特案"},{"rep":"Wei","store":"18461770","contract":11738700.0,"actual":1.0,"rate":0.1841,"type":"年特案"},{"rep":"Yi","store":"8817117","contract":7171609.0,"actual":1.0,"rate":0.1125,"type":"年特案"},{"rep":"TTL","store":"100137088.999992","contract":63771508.0,"actual":1.0,"rate":0,"type":"年特案"}],"store_monthly":{"買酒網":{"10":[{"product":"格蘭哥尼","qty":24,"price":1135.0,"amount":27240.0}],"11":[{"product":"格蘭哥尼","qty":84,"price":1135.0,"amount":95340.0}],"12":[{"product":"格蘭哥尼","qty":12,"price":1135.0,"amount":13620.0}],"1":[{"product":"格蘭哥尼","qty":12,"price":1135.0,"amount":13620.0}],"2":[{"product":"格蘭哥尼","qty":12,"price":1135.0,"amount":13620.0}],"3":[{"product":"格蘭哥尼","qty":12,"price":1135.0,"amount":13620.0}]},"昭業":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"佳賀":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"自立":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"礫石(青剛櫟)":{"10":[],"11":[{"product":"格蘭哥尼","qty":12,"price":1135.0,"amount":13620.0}],"12":[{"product":"格蘭哥尼","qty":12,"price":1135.0,"amount":13620.0}],"1":[],"2":[],"3":[]},"偉成":{"10":[{"product":"格蘭哥尼","qty":6,"price":1135.0,"amount":6810.0}],"11":[],"12":[],"1":[],"2":[{"product":"格蘭哥尼","qty":12,"price":1135.0,"amount":13620.0}],"3":[]},"台元(佳亨)":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"葡晶":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"美芝城(不倒翁)":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"奕欣(600萬)":{"10":[],"11":[],"12":[{"product":"格蘭哥尼","qty":24,"price":1135.0,"amount":27240.0}],"1":[],"2":[],"3":[{"product":"格蘭哥尼","qty":24,"price":1135.0,"amount":27240.0}]},"奕欣(400萬)":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"寰亨":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"品翔":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]},"AAA":{"10":[],"11":[],"12":[],"1":[],"2":[],"3":[]}},"flex_stores":[{"rep":"Emily","store":"良新","plan":"A","contract":1400000.0,"total":257376.0,"q1":0.0,"q2":257376.0,"rate":0.1838,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"茂豐","plan":"A","contract":1400000.0,"total":642898.0,"q1":222120.0,"q2":420778.0,"rate":0.4592,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"洋酒城","plan":"A","contract":1400000.0,"total":1108334.0,"q1":257064.0,"q2":851270.0,"rate":0.7917,"result_q1":"不符","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"波爾多","plan":"B","contract":700000.0,"total":785988.0,"q1":169848.0,"q2":616140.0,"rate":1.1228,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"萬華菸酒","plan":"B","contract":700000.0,"total":620136.0,"q1":419164.0,"q2":200972.0,"rate":0.8859,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"文彬","plan":"B","contract":700000.0,"total":296040.0,"q1":117480.0,"q2":178560.0,"rate":0.4229,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"巷弄","plan":"B","contract":700000.0,"total":554724.0,"q1":374490.0,"q2":180234.0,"rate":0.7925,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"珈品","plan":"B","contract":700000.0,"total":838985.0,"q1":347625.0,"q2":491360.0,"rate":1.1986,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"全日發","plan":"B","contract":700000.0,"total":556198.0,"q1":462052.0,"q2":94146.0,"rate":0.7946,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"呈鑫","plan":"C","contract":400000.0,"total":370435.0,"q1":231220.0,"q2":139215.0,"rate":0.9261,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"旭品","plan":"C","contract":400000.0,"total":99900.0,"q1":80100.0,"q2":19800.0,"rate":0.2497,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"松山","plan":"C","contract":400000.0,"total":334600.0,"q1":204650.0,"q2":129950.0,"rate":0.8365,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"三禾","plan":"B","contract":700000.0,"total":632884.0,"q1":394058.0,"q2":238826.0,"rate":0.9041,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"齊泰","plan":"C","contract":400000.0,"total":0.0,"q1":0.0,"q2":0.0,"rate":0.0,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"酒酒專販所","plan":"C","contract":400000.0,"total":233760.0,"q1":134760.0,"q2":99000.0,"rate":0.5844,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"酒大王","plan":"B","contract":700000.0,"total":706816.0,"q1":422548.0,"q2":284268.0,"rate":1.0097,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"拿破崙","plan":"C","contract":400000.0,"total":54925.0,"q1":20688.0,"q2":34237.0,"rate":0.1373,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"金品","plan":"C","contract":400000.0,"total":129542.0,"q1":8212.0,"q2":121330.0,"rate":0.3239,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"醇豐酒藏(安勝)","plan":"C","contract":400000.0,"total":90460.0,"q1":59320.0,"q2":31140.0,"rate":0.2261,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"森成","plan":"C","contract":400000.0,"total":197690.0,"q1":68692.0,"q2":128998.0,"rate":0.4942,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Emily","store":"小六","plan":"C","contract":400000.0,"total":192538.0,"q1":56536.0,"q2":136002.0,"rate":0.4813,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"加州","plan":"B","contract":700000.0,"total":619267.0,"q1":315456.0,"q2":303811.0,"rate":0.8847,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"友美","plan":"B","contract":700000.0,"total":321657.0,"q1":217078.0,"q2":104579.0,"rate":0.4595,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"亨玖","plan":"C","contract":400000.0,"total":118800.0,"q1":74280.0,"q2":44520.0,"rate":0.297,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"金盃","plan":"C","contract":400000.0,"total":237096.0,"q1":62808.0,"q2":174288.0,"rate":0.5927,"result_q1":"不符","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"添酒","plan":"B","contract":700000.0,"total":370426.0,"q1":241280.0,"q2":129146.0,"rate":0.5292,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"亙麗","plan":"C","contract":400000.0,"total":201281.0,"q1":80599.0,"q2":120682.0,"rate":0.5032,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"酒覓","plan":"C","contract":400000.0,"total":130374.0,"q1":78810.0,"q2":51564.0,"rate":0.3259,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"春泰行","plan":"B","contract":700000.0,"total":493558.0,"q1":373524.0,"q2":120034.0,"rate":0.7051,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"一七零九","plan":"B","contract":700000.0,"total":490125.0,"q1":272952.0,"q2":217173.0,"rate":0.7002,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"酒多樂","plan":"B","contract":700000.0,"total":689394.0,"q1":254242.0,"q2":435152.0,"rate":0.9848,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"上醇","plan":"A","contract":1400000.0,"total":478140.0,"q1":398940.0,"q2":79200.0,"rate":0.3415,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"麥德里","plan":"C","contract":400000.0,"total":158784.0,"q1":91440.0,"q2":67344.0,"rate":0.397,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jerry","store":"愛酒窩","plan":"C","contract":400000.0,"total":21279.0,"q1":6159.0,"q2":15120.0,"rate":0.0532,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"古典","plan":"C","contract":400000.0,"total":184418.0,"q1":0.0,"q2":184418.0,"rate":0.461,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"君薈","plan":"B","contract":700000.0,"total":460857.0,"q1":289736.0,"q2":171121.0,"rate":0.6584,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"日享","plan":"A","contract":1400000.0,"total":965123.0,"q1":737798.0,"q2":227325.0,"rate":0.6894,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"三兄弟","plan":"B","contract":700000.0,"total":401520.0,"q1":206996.0,"q2":194524.0,"rate":0.5736,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"宏亞-博酒萊","plan":"A","contract":1400000.0,"total":1240189.0,"q1":253946.0,"q2":986243.0,"rate":0.8858,"result_q1":"不符","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"美滿","plan":"A","contract":1400000.0,"total":626802.0,"q1":487242.0,"q2":139560.0,"rate":0.4477,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"巧巧","plan":"A","contract":1400000.0,"total":499660.0,"q1":379424.0,"q2":120236.0,"rate":0.3569,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"威士忌先生","plan":"A","contract":1400000.0,"total":927920.0,"q1":518550.0,"q2":409370.0,"rate":0.6628,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"南區楊","plan":"C","contract":400000.0,"total":143160.0,"q1":115920.0,"q2":27240.0,"rate":0.3579,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"唯君(欣州)","plan":"B","contract":700000.0,"total":599490.0,"q1":416616.0,"q2":182874.0,"rate":0.8564,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"華威","plan":"C","contract":400000.0,"total":99960.0,"q1":97690.0,"q2":2270.0,"rate":0.2499,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"宸逸","plan":"C","contract":400000.0,"total":159660.0,"q1":100260.0,"q2":59400.0,"rate":0.3992,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Eric","store":"金馬","plan":"C","contract":400000.0,"total":303500.0,"q1":189850.0,"q2":113650.0,"rate":0.7588,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"酒江村","plan":"B","contract":700000.0,"total":186216.0,"q1":81480.0,"q2":104736.0,"rate":0.266,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"全球","plan":"A","contract":1400000.0,"total":0.0,"q1":0.0,"q2":0.0,"rate":0.0,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"大登","plan":"A","contract":1400000.0,"total":400200.0,"q1":319740.0,"q2":80460.0,"rate":0.2859,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"盛紅","plan":"C","contract":400000.0,"total":212378.0,"q1":146006.0,"q2":66372.0,"rate":0.5309,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"鉅洋","plan":"C","contract":400000.0,"total":0.0,"q1":0.0,"q2":0.0,"rate":0.0,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"昇品","plan":"C","contract":400000.0,"total":0.0,"q1":0.0,"q2":0.0,"rate":0.0,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"三桶","plan":"C","contract":400000.0,"total":147562.0,"q1":72462.0,"q2":75100.0,"rate":0.3689,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"精湛","plan":"C","contract":400000.0,"total":205432.0,"q1":118128.0,"q2":87304.0,"rate":0.5136,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"小林酒(上多)","plan":"B","contract":700000.0,"total":459492.0,"q1":459492.0,"q2":0.0,"rate":0.6564,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"逍遙","plan":"C","contract":400000.0,"total":257629.0,"q1":173889.0,"q2":83740.0,"rate":0.6441,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"紅酒莊","plan":"A","contract":1400000.0,"total":853377.0,"q1":680328.0,"q2":173049.0,"rate":0.6096,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Jayden","store":"酒湖","plan":"C","contract":400000.0,"total":271820.0,"q1":153780.0,"q2":118040.0,"rate":0.6795,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"和易","plan":"B","contract":700000.0,"total":850220.0,"q1":480020.0,"q2":370200.0,"rate":1.2146,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"鼓山莊","plan":"B","contract":700000.0,"total":358262.0,"q1":280164.0,"q2":78098.0,"rate":0.5118,"result_q1":"可結","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"禾穩","plan":"A","contract":1400000.0,"total":1090973.0,"q1":518044.0,"q2":572929.0,"rate":0.7793,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"南威海","plan":"C","contract":400000.0,"total":227272.0,"q1":126912.0,"q2":100360.0,"rate":0.5682,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"宸泰","plan":"C","contract":400000.0,"total":316658.0,"q1":169860.0,"q2":146798.0,"rate":0.7916,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"冠華","plan":"B","contract":700000.0,"total":638178.0,"q1":332220.0,"q2":305958.0,"rate":0.9117,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"隱玖生活","plan":"C","contract":400000.0,"total":248993.0,"q1":114845.0,"q2":134148.0,"rate":0.6225,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"裕陞","plan":"B","contract":700000.0,"total":631578.0,"q1":304212.0,"q2":327366.0,"rate":0.9023,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"振昌","plan":"C","contract":400000.0,"total":446617.0,"q1":171404.0,"q2":275213.0,"rate":1.1165,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"冠德","plan":"C","contract":400000.0,"total":426204.0,"q1":169812.0,"q2":256392.0,"rate":1.0655,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"嘉堭","plan":"B","contract":700000.0,"total":502620.0,"q1":289208.0,"q2":213412.0,"rate":0.718,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"品鑫","plan":"C","contract":400000.0,"total":246792.0,"q1":186157.0,"q2":60635.0,"rate":0.617,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"柏森","plan":"C","contract":400000.0,"total":124896.0,"q1":34128.0,"q2":90768.0,"rate":0.3122,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Wei","store":"佳酒莊","plan":"C","contract":400000.0,"total":54120.0,"q1":39600.0,"q2":14520.0,"rate":0.1353,"result_q1":"不符","result_q2":"不符","has_q2":true,"type":"彈性年約"},{"rep":"Yi","store":"尚宏","plan":"C","contract":400000.0,"total":411840.0,"q1":232272.0,"q2":179568.0,"rate":1.0296,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Yi","store":"久景","plan":"C","contract":400000.0,"total":751187.0,"q1":366289.0,"q2":384898.0,"rate":1.878,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Yi","store":"醇爵","plan":"C","contract":400000.0,"total":300600.0,"q1":189000.0,"q2":111600.0,"rate":0.7515,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Yi","store":"大大","plan":"C","contract":400000.0,"total":230859.0,"q1":152049.0,"q2":78810.0,"rate":0.5771,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Yi","store":"金富祥","plan":"C","contract":400000.0,"total":451202.0,"q1":125568.0,"q2":325634.0,"rate":1.128,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"},{"rep":"Yi","store":"歐美","plan":"C","contract":400000.0,"total":220310.0,"q1":167830.0,"q2":52480.0,"rate":0.5508,"result_q1":"可結","result_q2":"可結","has_q2":true,"type":"彈性年約"}],"big_mouth_stores":[{"rep":"Jerry","store":"啤酒大學","item":"IOS15","contract":302400.0,"actual":231840.0,"rate":0.7667,"type":"大口活動"},{"rep":"Emily","store":"淶淶","item":"IOS18","contract":69840.0,"actual":69840.0,"rate":1.0,"type":"大口活動"},{"rep":"Jayden","store":"皇品","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"杜康-斗六","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"大口活動"},{"rep":"Wei","store":"呂記","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"大口活動"},{"rep":"Jerry","store":"啤酒大學2","item":"IOS18","contract":419040.0,"actual":139680.0,"rate":0.3333,"type":"大口活動"},{"rep":"Emily","store":"淶淶2","item":"IOS15","contract":20160.0,"actual":16800.0,"rate":0.8333,"type":"大口活動"},{"rep":"Jayden","store":"文祥","item":"IOS12","contract":56520.0,"actual":96084.0,"rate":1.7,"type":"大口活動"},{"rep":"Eric","store":"杜康-成功","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"大口活動"},{"rep":"Wei","store":"邑東","item":"IOS15","contract":20160.0,"actual":30240.0,"rate":1.5,"type":"大口活動"},{"rep":"Jerry","store":"金酒殿","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"大口活動"},{"rep":"Emily","store":"3Q","item":"IOS15","contract":100800.0,"actual":90720.0,"rate":0.9,"type":"大口活動"},{"rep":"Jayden","store":"酒裕","item":"IOS15","contract":50400.0,"actual":50400.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"金馬","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"大口活動"},{"rep":"Jerry","store":"鑫生活","item":"IOS15","contract":20160.0,"actual":23520.0,"rate":1.1667,"type":"大口活動"},{"rep":"Emily","store":"桂冠酒莊","item":"IOS18","contract":27936.0,"actual":13968.0,"rate":0.5,"type":"大口活動"},{"rep":"Jayden","store":"文祥2","item":"IOS15","contract":201600.0,"actual":223440.0,"rate":1.1083,"type":"大口活動"},{"rep":"Eric","store":"酒尚","item":"IOS18","contract":419040.0,"actual":446976.0,"rate":1.0667,"type":"大口活動"},{"rep":"Emily","store":"阿爾發","item":"IOS18","contract":27936.0,"actual":6984.0,"rate":0.25,"type":"大口活動"},{"rep":"Jayden","store":"喜洋洋","item":"IOS15","contract":50400.0,"actual":50400.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"酒尚2","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"大口活動"},{"rep":"Emily","store":"奕鑫行","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"大口活動"},{"rep":"Jayden","store":"原力","item":"IOS18","contract":419040.0,"actual":488880.0,"rate":1.1667,"type":"大口活動"},{"rep":"Eric","store":"尋酒趣","item":"IOS15","contract":201600.0,"actual":201600.0,"rate":1.0,"type":"大口活動"},{"rep":"Emily","store":"怡和","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"大口活動"},{"rep":"Jayden","store":"吉立","item":"IOS18","contract":69840.0,"actual":76824.0,"rate":1.1,"type":"大口活動"},{"rep":"Eric","store":"尋酒趣2","item":"IOS18","contract":419040.0,"actual":419040.0,"rate":1.0,"type":"大口活動"},{"rep":"Emily","store":"威苑","item":"IOS18","contract":27936.0,"actual":55872.0,"rate":2.0,"type":"大口活動"},{"rep":"Jayden","store":"文祥3","item":"IOS18","contract":279360.0,"actual":251424.0,"rate":0.9,"type":"大口活動"},{"rep":"Eric","store":"隆豐","item":"IOS12","contract":56520.0,"actual":67824.0,"rate":1.2,"type":"大口活動"},{"rep":"Emily","store":"威苑2","item":"IOS21","contract":49280.0,"actual":49280.0,"rate":1.0,"type":"大口活動"},{"rep":"Jayden","store":"艾雷","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"隆豐2","item":"IOS18","contract":27936.0,"actual":39576.0,"rate":1.4167,"type":"大口活動"},{"rep":"Jayden","store":"安迪","item":"TD12","contract":29160.0,"actual":29160.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"源鄉行","item":"IOS18","contract":139680.0,"actual":209520.0,"rate":1.5,"type":"大口活動"},{"rep":"Jayden","store":"酒港(全好行)","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"源鄉行2","item":"TD12","contract":29160.0,"actual":58320.0,"rate":2.0,"type":"大口活動"},{"rep":"Eric","store":"萬桶","item":"IOS15","contract":201600.0,"actual":226800.0,"rate":1.125,"type":"大口活動"},{"rep":"Eric","store":"酒尊","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"酒尊2","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"青旺","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"七七會社","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"阿清柑仔店","item":"IOS18","contract":27936.0,"actual":27936.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"沛緁","item":"IOS12","contract":11304.0,"actual":11304.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"三發洋行","item":"IOS18","contract":139680.0,"actual":139680.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"加納","item":"IOS18","contract":69840.0,"actual":69840.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"美感臨酒","item":"IOS15","contract":20160.0,"actual":20160.0,"rate":1.0,"type":"大口活動"},{"rep":"Eric","store":"桂冠","item":"IOS15","contract":50400.0,"actual":53760.0,"rate":1.0667,"type":"大口活動"},{"rep":"Eric","store":"華富","item":"IOS18","contract":139680.0,"actual":167616.0,"rate":1.2,"type":"大口活動"}]};
+
+let currentRep = null;
+let currentActivity = null;
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+function fmt(n){return n==null?'–':Math.round(n).toLocaleString('zh-TW')}
+function pct(r){return r==null?'–':(r*100).toFixed(1)+'%'}
+function rateClass(r){return r>=1?'rate-high':r>=0.6?'rate-mid':'rate-low'}
+function fillClass(r){return r>=1?'fill-over':r>=0.6?'fill-high':r>=0.3?'fill-mid':'fill-low'}
+function fillW(r){return Math.min(r*100,100)+'%'}
+function badgeClass(r){return r>=1?'badge-green':r>=0.6?'badge-orange':'badge-red'}
+
+function goTo(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p'+n).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+const REPS = ['Jerry','Emily','Eric','Jayden','Wei','Yi'];
+const ACTIVITIES = ['年特案','彈性年約','大口活動'];
+const ACTIVITY_TAGS = {'年特案':'tag-spec','彈性年約':'tag-flex','大口活動':'tag-big'};
+
+// ── Rep aggregate ─────────────────────────────────────────────────────────────
+function getRepStats(rep){
+  let totalContract=0, totalActual=0, storeCounts={};
+  ACTIVITIES.forEach(a=>storeCounts[a]=0);
+
+  D.spec_stores.filter(s=>s.rep===rep).forEach(s=>{
+    totalContract+=s.contract; totalActual+=s.actual; storeCounts['年特案']++;
+  });
+  D.flex_stores.filter(s=>s.rep===rep).forEach(s=>{
+    totalContract+=s.contract; totalActual+=s.total; storeCounts['彈性年約']++;
+  });
+  D.big_mouth_stores.filter(s=>s.rep===rep).forEach(s=>{
+    totalContract+=s.contract; totalActual+=s.actual; storeCounts['大口活動']++;
+  });
+  return {totalContract, totalActual, rate: totalContract?totalActual/totalContract:0, storeCounts};
+}
+
+// ── Grand total ───────────────────────────────────────────────────────────────
+function getGrandTotal(){
+  let tc=0, ta=0;
+  D.spec_stores.forEach(s=>{tc+=s.contract;ta+=s.actual});
+  D.flex_stores.forEach(s=>{tc+=s.contract;ta+=s.total});
+  D.big_mouth_stores.forEach(s=>{tc+=s.contract;ta+=s.actual});
+  return {tc,ta,rate:tc?ta/tc:0};
+}
+
+// ── Activity aggregate for rep ────────────────────────────────────────────────
+function getActivityStats(rep, activity){
+  let stores = [];
+  if(activity==='年特案') stores = D.spec_stores.filter(s=>s.rep===rep);
+  else if(activity==='彈性年約') stores = D.flex_stores.filter(s=>s.rep===rep);
+  else stores = D.big_mouth_stores.filter(s=>s.rep===rep);
+  let tc=0, ta=0;
+  stores.forEach(s=>{tc+=s.contract; ta+=(s.actual||s.total||0);});
+  return {tc,ta,rate:tc?ta/tc:0,count:stores.length};
+}
+
+// ── Page 1 render ─────────────────────────────────────────────────────────────
+function renderP1(){
+  const {tc,ta,rate} = getGrandTotal();
+  let html = '<div class="summary-card">';
+  html += '<div class="summary-title">全員總計 (三項活動)</div>';
+  const fc = fillClass(rate);
+  html += '<div class="progress-bar"><div class="progress-fill '+fc+'" style="width:'+fillW(rate)+'"></div></div>';
+  html += '<div class="rep-stats"><span>合約 $'+fmt(tc)+'</span><span style="color:#e6edf3;font-weight:600">'+pct(rate)+'</span><span>進貨 $'+fmt(ta)+'</span></div>';
+  html += '</div>';
+
+  REPS.forEach(rep=>{
+    const {totalContract,totalActual,rate,storeCounts} = getRepStats(rep);
+    const fc = fillClass(rate);
+    const rc = rateClass(rate);
+    html += '<div class="rep-card" onclick="openRep(''+rep+'')">';
+    html += '<div class="rep-header"><span class="rep-name">'+rep+'</span><span class="rep-rate '+rc+'">'+pct(rate)+'</span></div>';
+    html += '<div class="progress-bar"><div class="progress-fill '+fc+'" style="width:'+fillW(rate)+'"></div></div>';
+    html += '<div class="rep-stats"><span>合約 $'+fmt(totalContract)+'</span><span>進貨 $'+fmt(totalActual)+'</span></div>';
+    let tagStr = ACTIVITIES.filter(a=>storeCounts[a]>0).map(a=>'<span class="'+ACTIVITY_TAGS[a]+'">'+a+' '+storeCounts[a]+'</span>').join(' ');
+    html += '<div class="rep-meta" style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">'+tagStr+'</div>';
+    html += '<div class="chevron" style="text-align:right;margin-top:4px">›</div>';
+    html += '</div>';
+  });
+
+  document.getElementById('p1-content').innerHTML = html;
+}
+
+// ── Page 2 render ─────────────────────────────────────────────────────────────
+function openRep(rep){
+  currentRep = rep;
+  document.getElementById('p2-title').textContent = rep + ' 的活動';
+  document.getElementById('p2-subtitle').textContent = '點選活動查看店家列表';
+
+  const {totalContract,totalActual,rate} = getRepStats(rep);
+  let html = '<div class="summary-card">';
+  html += '<div class="summary-title">'+rep+' 合計</div>';
+  const fc = fillClass(rate);
+  html += '<div class="progress-bar"><div class="progress-fill '+fc+'" style="width:'+fillW(rate)+'"></div></div>';
+  html += '<div class="rep-stats"><span>合約 $'+fmt(totalContract)+'</span><span style="color:#e6edf3;font-weight:600">'+pct(rate)+'</span><span>進貨 $'+fmt(totalActual)+'</span></div>';
+  html += '</div>';
+
+  ACTIVITIES.forEach(activity=>{
+    const {tc,ta,rate,count} = getActivityStats(rep, activity);
+    if(count === 0) return;
+    const fc = fillClass(rate);
+    const rc = rateClass(rate);
+    html += '<div class="activity-card" onclick="openActivity(''+activity+'')">';
+    html += '<div class="activity-header">';
+    html += '<span class="activity-name"><span class="'+ACTIVITY_TAGS[activity]+'" style="margin-right:6px">'+activity+'</span></span>';
+    html += '<span class="activity-count">'+count+' 家</span>';
+    html += '</div>';
+    html += '<div class="progress-bar"><div class="progress-fill '+fc+'" style="width:'+fillW(rate)+'"></div></div>';
+    html += '<div class="rep-stats"><span>合約 $'+fmt(tc)+'</span><span class="'+rc+'">'+pct(rate)+'</span><span>進貨 $'+fmt(ta)+'</span></div>';
+    html += '<div class="chevron" style="text-align:right;margin-top:6px">›</div>';
+    html += '</div>';
+  });
+
+  document.getElementById('p2-content').innerHTML = html;
+  goTo(2);
+}
+
+// ── Page 3 render ─────────────────────────────────────────────────────────────
+function openActivity(activity){
+  currentActivity = activity;
+  document.getElementById('p3-title').textContent = currentRep + ' · ' + activity;
+  document.getElementById('p3-subtitle').textContent = '依合約金額排序 ↓';
+
+  let stores = [];
+  if(activity==='年特案'){
+    stores = D.spec_stores.filter(s=>s.rep===currentRep).map(s=>({
+      name:s.store, contract:s.contract, actual:s.actual, rate:s.rate,
+      extra:'', clickable:true
+    })).sort((a,b)=>b.contract-a.contract);
+  } else if(activity==='彈性年約'){
+    stores = D.flex_stores.filter(s=>s.rep===currentRep).map(s=>({
+      name:s.store, contract:s.contract, actual:s.total, rate:s.rate,
+      extra:'方案'+s.plan+(s.result_q2?' · Q2:'+s.result_q2:''), clickable:true,
+      q1:s.q1, q2:s.q2, result_q1:s.result_q1, result_q2:s.result_q2, plan:s.plan
+    })).sort((a,b)=>b.contract-a.contract);
+  } else {
+    stores = D.big_mouth_stores.filter(s=>s.rep===currentRep).map(s=>({
+      name:s.store, contract:s.contract, actual:s.actual, rate:s.rate,
+      extra:s.item, clickable:true, item:s.item
+    })).sort((a,b)=>b.contract-a.contract);
+  }
+
+  let html = '';
+  if(stores.length === 0){
+    html = '<div class="empty-state">此業務無此活動的店家資料</div>';
+  }
+  stores.forEach((s,i)=>{
+    const rc = rateClass(s.rate);
+    const bc = badgeClass(s.rate);
+    html += '<div class="store-card" onclick="openStore('+i+')">';
+    html += '<div class="store-header">';
+    html += '<span class="rank">'+(i+1)+'</span>';
+    html += '<span class="store-name">'+s.name+'</span>';
+    if(s.extra) html += '<span class="store-plan">'+s.extra+'</span>';
+    html += '<span class="store-rate badge '+bc+'">'+pct(s.rate)+'</span>';
+    html += '</div>';
+    const fc = fillClass(s.rate);
+    html += '<div class="progress-bar"><div class="progress-fill '+fc+'" style="width:'+fillW(s.rate)+'"></div></div>';
+    html += '<div class="store-stats"><span>合約 $'+fmt(s.contract)+'</span><span>進貨 $'+fmt(s.actual)+'</span></div>';
+    html += '</div>';
+  });
+
+  // Store in window for detail access
+  window._storeList = stores;
+  document.getElementById('p3-content').innerHTML = html;
+  goTo(3);
+}
+
+// ── Page 4 render ─────────────────────────────────────────────────────────────
+function openStore(idx){
+  const s = window._storeList[idx];
+  document.getElementById('p4-title').textContent = s.name;
+  document.getElementById('p4-subtitle').textContent = currentRep + ' · ' + currentActivity;
+
+  let html = '<div class="detail-section">';
+  html += '<div class="section-title">概況</div>';
+  const fc = fillClass(s.rate);
+  html += '<div class="progress-bar" style="margin-bottom:8px"><div class="progress-fill '+fc+'" style="width:'+fillW(s.rate)+'"></div></div>';
+  html += '<div class="stat-row"><span class="stat-label">合約金額</span><span class="stat-val">$'+fmt(s.contract)+'</span></div>';
+  html += '<div class="stat-row"><span class="stat-label">已進貨金額</span><span class="stat-val">$'+fmt(s.actual)+'</span></div>';
+  html += '<div class="stat-row"><span class="stat-label">達成率</span><span class="stat-val"><span class="badge '+badgeClass(s.rate)+'">'+pct(s.rate)+'</span></span></div>';
+
+  if(currentActivity==='彈性年約'){
+    html += '<div class="stat-row"><span class="stat-label">方案</span><span class="stat-val">'+s.plan+'</span></div>';
+    html += '<div class="stat-row"><span class="stat-label">Q1進貨</span><span class="stat-val">$'+fmt(s.q1)+'</span></div>';
+    html += '<div class="stat-row"><span class="stat-label">Q2進貨</span><span class="stat-val">$'+fmt(s.q2)+'</span></div>';
+    if(s.result_q1) html += '<div class="stat-row"><span class="stat-label">Q1結案</span><span class="stat-val">'+s.result_q1+'</span></div>';
+    if(s.result_q2) html += '<div class="stat-row"><span class="stat-label">Q2結案</span><span class="stat-val">'+s.result_q2+'</span></div>';
+  }
+
+  if(currentActivity==='大口活動' && s.item){
+    html += '<div class="stat-row"><span class="stat-label">品項</span><span class="stat-val">'+s.item+'</span></div>';
+  }
+  html += '</div>';
+
+  // Monthly detail for 年特案
+  if(currentActivity==='年特案'){
+    const monthly = D.store_monthly[s.name];
+    if(monthly){
+      html += '<div class="detail-section">';
+      html += '<div class="section-title">月度明細</div>';
+      const months = [10,11,12,1,2,3];
+      const mLabels = {10:'10月',11:'11月',12:'12月',1:'1月',2:'2月',3:'3月'};
+      months.forEach(m=>{
+        const items = monthly[String(m)];
+        if(!items || items.length===0) return;
+        const total = items.reduce((acc,i)=>acc+i.amount,0);
+        html += '<div class="month-row">';
+        html += '<span class="month-label">'+mLabels[m]+'</span>';
+        html += '<div class="month-items">';
+        items.forEach(item=>{
+          html += '<div class="month-item">'+item.product+' × '+item.qty+'瓶</div>';
+        });
+        html += '</div>';
+        html += '<span class="month-amount">$'+fmt(total)+'</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  document.getElementById('p4-content').innerHTML = html;
+  goTo(4);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderP1();
+</script>
+</body>
+</html>
